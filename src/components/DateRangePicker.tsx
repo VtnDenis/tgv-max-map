@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useId } from 'react';
 
 export interface DateRangePickerProps {
   from: string; // "YYYY-MM-DD"
@@ -102,6 +102,7 @@ export default function DateRangePicker({
   const [hover, setHover] = useState<string | null>(null);
   const [selecting, setSelecting] = useState(false);
   const [open, setOpen] = useState(false);
+  const id = useId();
 
   useEffect(() => {
     setSelecting(false);
@@ -198,12 +199,16 @@ export default function DateRangePicker({
 
   return (
     <div className="field">
-      <label>{label}</label>
+      <label htmlFor={id}>{label}</label>
       <button
         type="button"
+        id={id}
         className="date-summary"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') setOpen(false);
+        }}
       >
         <span>{summary}</span>
         <span className="chevron" aria-hidden="true">
@@ -211,9 +216,20 @@ export default function DateRangePicker({
         </span>
       </button>
 
+      <div className="hint">
+        {selecting
+          ? 'Choisissez maintenant la date de fin.'
+          : 'Cliquez sur la date de départ puis la date de fin.'}
+      </div>
+
       {open && (
         <>
-          <div className="calendar">
+          <div
+            className="calendar"
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setOpen(false);
+            }}
+          >
             <div className="calendar-header">
               <button
                 type="button"

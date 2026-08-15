@@ -52,7 +52,7 @@ export default function ItineraryControls({
   return (
     <div>
       <Slider
-        label="Correspondances max"
+        label="Nombre de correspondances"
         value={value.maxConnections}
         min={0}
         max={record ? 8 : 2}
@@ -61,7 +61,7 @@ export default function ItineraryControls({
         onChange={(v) => onChange({ ...value, maxConnections: v })}
       />
       <Slider
-        label="Correspondance min"
+        label="Temps de correspondance min"
         value={value.minConnection}
         min={0}
         max={60}
@@ -70,7 +70,7 @@ export default function ItineraryControls({
         onChange={(v) => onChange({ ...value, minConnection: v })}
       />
       <Slider
-        label="Correspondance max"
+        label="Temps de correspondance max"
         value={value.maxConnection}
         min={30}
         max={240}

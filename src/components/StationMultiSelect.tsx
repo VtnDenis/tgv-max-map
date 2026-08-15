@@ -190,6 +190,7 @@ export default function StationMultiSelect({
                 key={match.station.code}
                 className={index === highlighted ? 'highlighted' : undefined}
                 onMouseDown={(e) => e.preventDefault()}
+                onMouseEnter={() => setHighlighted(index)}
                 onClick={() => add(match.station)}
               >
                 {match.station.name}

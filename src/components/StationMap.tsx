@@ -63,11 +63,13 @@ function FocusController({
 
   useEffect(() => {
     if (!focus) return;
-    map.flyTo(
-      [focus.lat, focus.lon],
-      Math.max(map.getZoom(), focusZoom ?? 9),
-      { duration: focusDuration ?? 0.8 },
-    );
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const zoom = Math.max(map.getZoom(), focusZoom ?? 9);
+    if (reduce) {
+      map.setView([focus.lat, focus.lon], zoom);
+    } else {
+      map.flyTo([focus.lat, focus.lon], zoom, { duration: focusDuration ?? 0.8 });
+    }
     markersRef.current.get(focus.code)?.openPopup();
   }, [focus, focusZoom, focusDuration, map, markersRef]);
 

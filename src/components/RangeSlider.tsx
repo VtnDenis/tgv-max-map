@@ -53,9 +53,10 @@ export default function RangeSlider({
               {children}
             </div>
           )}
-          renderThumb={({ props, isDragged }) => (
+          renderThumb={({ props, isDragged, index }) => (
             <div
               {...props}
+              aria-label={`${label} ${index === 0 ? 'min' : 'max'}`}
               className="range-thumb"
               style={{
                 ...props.style,

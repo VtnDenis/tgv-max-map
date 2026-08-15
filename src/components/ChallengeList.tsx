@@ -36,7 +36,10 @@ export default function ChallengeList({
             onKeyDown={
               isSolved
                 ? (e) => {
-                    if (e.key === 'Enter') onSelect(result.winner!.code);
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onSelect(result.winner!.code);
+                    }
                   }
                 : undefined
             }

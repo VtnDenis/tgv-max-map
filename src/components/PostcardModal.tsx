@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Itinerary } from '../types';
 import {
   postcardBlob,
@@ -21,6 +21,9 @@ export default function PostcardModal({
   const [sharing, setSharing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const modalRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+
   const dataUrl = useMemo(() => {
     if (!itinerary) return null;
     return renderPostcardDataUrl({ itinerary, theme });
@@ -28,11 +31,33 @@ export default function PostcardModal({
 
   useEffect(() => {
     if (!itinerary) return;
+    const previous = document.activeElement as HTMLElement | null;
+    closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab' || !modalRef.current) return;
+      const focusables = modalRef.current.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      previous?.focus();
+    };
   }, [itinerary, onClose]);
 
   if (!itinerary || !dataUrl) return null;
@@ -76,6 +101,7 @@ export default function PostcardModal({
       await navigator.share(data);
     } catch (err) {
       if (!(err instanceof Error && err.name === 'AbortError')) {
+        setError("Le partage a échoué. Téléchargement du fichier à la place.");
         handleDownload();
       }
     } finally {
@@ -91,6 +117,7 @@ export default function PostcardModal({
         aria-modal="true"
         aria-label="Aperçu de la carte postale"
         onClick={(e) => e.stopPropagation()}
+        ref={modalRef}
       >
         <div className="postcard-head">
           <h2>Carte postale</h2>
@@ -99,6 +126,7 @@ export default function PostcardModal({
             className="postcard-close"
             aria-label="Fermer"
             onClick={onClose}
+            ref={closeRef}
           >
             ✕
           </button>
@@ -121,7 +149,7 @@ export default function PostcardModal({
             {sharing ? 'Partage…' : 'Partager'}
           </button>
         </div>
-        {error && <div className="hint" style={{ color: '#e3000f' }}>{error}</div>}
+        {error && <div className="hint" style={{ color: 'var(--accent)' }}>{error}</div>}
       </div>
     </div>
   );

@@ -34,6 +34,11 @@
   box-sizing: border-box;
 }
 
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 html,
 body,
 #root {
@@ -90,10 +95,10 @@ body {
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
-  width: 34px;
-  height: 34px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1;
   cursor: pointer;
 }
@@ -155,8 +160,26 @@ body.resizing .resizer {
 
 .field input:focus,
 .field select:focus {
-  outline: none;
   border-color: var(--accent);
+}
+
+.field > summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  user-select: none;
+  list-style-position: inside;
+}
+
+.field > summary:hover {
+  color: var(--accent);
+}
+
+.field[open] > summary {
+  color: var(--accent);
 }
 
 .date-summary {
@@ -204,8 +227,8 @@ body.resizing .resizer {
 }
 
 .calendar-nav {
-  width: 30px;
-  height: 30px;
+  width: 38px;
+  height: 38px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
@@ -235,7 +258,7 @@ body.resizing .resizer {
 }
 
 .calendar-day {
-  height: 34px;
+  height: 40px;
   border: none;
   border-radius: 8px;
   background: transparent;
@@ -254,7 +277,8 @@ body.resizing .resizer {
 }
 
 .calendar-day:disabled {
-  color: var(--border);
+  color: var(--muted);
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -307,7 +331,7 @@ body.resizing .resizer {
 
 .tabs button {
   flex: 1;
-  padding: 8px;
+  padding: 10px;
   border: none;
   background: transparent;
   border-radius: 8px;
@@ -332,12 +356,15 @@ body.resizing .resizer {
 }
 
 .tabs.mode-tabs {
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
 }
 
 .tabs.mode-tabs button {
-  flex: 1 1 auto;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 button.primary {
@@ -448,8 +475,8 @@ button.roulette:disabled {
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
-  width: 30px;
-  height: 30px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   cursor: pointer;
   font-size: 14px;
@@ -625,7 +652,8 @@ button.roulette:disabled {
 }
 
 .add-btn {
-  width: 38px;
+  width: 42px;
+  min-height: 42px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
@@ -642,7 +670,8 @@ button.roulette:disabled {
 }
 
 .geo-btn {
-  width: 38px;
+  width: 42px;
+  min-height: 42px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
@@ -681,7 +710,7 @@ button.roulette:disabled {
   font-size: 15px;
   line-height: 1;
   cursor: pointer;
-  padding: 0;
+  padding: 6px;
 }
 
 .legend {
@@ -719,8 +748,8 @@ button.roulette:disabled {
 
 .heatmap-play {
   flex: 0 0 auto;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border: none;
   border-radius: 50%;
   background: var(--accent);
@@ -762,7 +791,7 @@ button.roulette:disabled {
 }
 
 .heatmap-speed button {
-  padding: 4px 8px;
+  padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: transparent;

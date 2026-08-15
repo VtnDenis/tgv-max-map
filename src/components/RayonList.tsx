@@ -15,7 +15,11 @@ interface RayonListProps {
 /** Sorted list of destinations within the radius, with distance and direct departures. */
 export default function RayonList({ destinations, onSelect }: RayonListProps): JSX.Element {
   if (destinations.length === 0) {
-    return <div className="hint">Aucune destination dans ce rayon.</div>;
+    return (
+      <div className="hint">
+        Aucune destination dans ce rayon. Augmentez le rayon (curseur ci-dessus).
+      </div>
+    );
   }
 
   return (
@@ -32,7 +36,10 @@ export default function RayonList({ destinations, onSelect }: RayonListProps): J
           tabIndex={0}
           onClick={() => onSelect?.(dest.code)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') onSelect?.(dest.code);
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onSelect?.(dest.code);
+            }
           }}
         >
           <div className="row">

@@ -1,11 +1,6 @@
 import type { Itinerary, Leg } from '../types';
 import { formatDuration, toMinutes } from '../lib/itinerary';
-
-function formatMinutes(min: number): string {
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-}
+import { formatDate, formatMinutes } from '../lib/format';
 
 function distinctDays(legs: Leg[]): number {
   return new Set(legs.map((leg) => leg.date).filter(Boolean)).size;
@@ -20,7 +15,7 @@ export function LegList(props: {
   const { legs, fixedName, mode, onSelect } = props;
 
   if (legs.length === 0) {
-    return <div className="hint">Aucune disponibilité MAX sur la période pour cette gare.</div>;
+    return <div className="hint">Aucune disponibilité MAX sur la période pour cette gare. Essayez d'élargir les horaires ou la plage de dates.</div>;
   }
 
   const groups = new Map<string, Leg[]>();
@@ -57,7 +52,10 @@ export function LegList(props: {
             tabIndex={0}
             onClick={() => onSelect?.(code)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') onSelect?.(code);
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onSelect?.(code);
+              }
             }}
           >
             <div className="row">
@@ -69,7 +67,7 @@ export function LegList(props: {
             {list.map((leg, i) => (
               <div className="row" key={i}>
                 <span className="time">
-                  {leg.date ? `${leg.date} · ` : ''}
+                  {leg.date ? `${formatDate(leg.date)} · ` : ''}
                   {leg.heure_depart} → {leg.heure_arrivee}
                 </span>
                 {leg.train_no ? <span className="badge leg">{leg.train_no}</span> : null}
@@ -96,7 +94,7 @@ export function ItineraryList(props: {
   const { itineraries, onSelect, selected = null, recordMode = false } = props;
 
   if (itineraries.length === 0) {
-    return <div className="hint">Aucun itinéraire trouvé.</div>;
+    return <div className="hint">Aucun itinéraire trouvé. Essayez de réduire le nombre de correspondances ou d'élargir les dates.</div>;
   }
 
   const maxConnections = recordMode
@@ -122,7 +120,10 @@ export function ItineraryList(props: {
             tabIndex={0}
             onClick={() => onSelect?.(itinerary)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') onSelect?.(itinerary);
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onSelect?.(itinerary);
+              }
             }}
           >
             <div className="row">
@@ -133,7 +134,7 @@ export function ItineraryList(props: {
             </div>
             <div className="row">
               <span className="muted">{formatDuration(duration)}</span>
-              {itinerary.date ? <span className="badge ok">{itinerary.date}</span> : null}
+              {itinerary.date ? <span className="badge ok">{formatDate(itinerary.date)}</span> : null}
             </div>
             {itinerary.legs.map((leg, j) => (
               <div className="muted" key={j}>

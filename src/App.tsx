@@ -32,6 +32,7 @@ import {
   toMinutes,
 } from './lib/itinerary';
 import { computeChallenges, computeLongestItinerary } from './lib/challenges';
+import { formatDate, formatDayLabel, formatTime } from './lib/format';
 import StationMap, { type MapLine } from './components/StationMap';
 import { ItineraryList, LegList } from './components/ResultsList';
 import RayonList, { type RayonDestination } from './components/RayonList';
@@ -56,24 +57,24 @@ import { useSameDayCelebration } from './hooks/useSameDayCelebration';
 import { useKonamiCode } from './hooks/useKonamiCode';
 
 const FIXED = '#e3000f';
-const AVAILABLE = '#0f9d58';
-const INTERMEDIATE = '#b26a00';
+const AVAILABLE = '#1f77b4';
+const INTERMEDIATE = '#9467bd';
 const HIGHLIGHT = '#f9ab00';
 const CHALLENGE_GOLD = '#f2b705';
 
-/** Gradient vert → orange → rouge pour l'intensité d'une carte de chauffe. */
+/** Ramp séquentielle "Blues", ordonnée en luminance, pour l'intensité d'une carte de chauffe. */
 function heatColor(t: number): string {
   const c = Math.max(0, Math.min(1, t));
-  const green = [15, 157, 88]; // #0f9d58
-  const orange = [178, 106, 0]; // #b26a00
-  const red = [227, 0, 15]; // #e3000f
+  const stops = [
+    [222, 235, 247],
+    [107, 174, 214],
+    [8, 81, 156],
+  ];
   const lerp = (a: number, b: number, k: number) => a + (b - a) * k;
-  const from = c < 0.5 ? green : orange;
-  const to = c < 0.5 ? orange : red;
+  const from = c < 0.5 ? stops[0] : stops[1];
+  const to = c < 0.5 ? stops[1] : stops[2];
   const k = c < 0.5 ? c / 0.5 : (c - 0.5) / 0.5;
-  return `rgb(${Math.round(lerp(from[0], to[0], k))},${Math.round(
-    lerp(from[1], to[1], k),
-  )},${Math.round(lerp(from[2], to[2], k))})`;
+  return `rgb(${Math.round(lerp(from[0], to[0], k))},${Math.round(lerp(from[1], to[1], k))},${Math.round(lerp(from[2], to[2], k))})`;
 }
 
 const HEATMAP_LINK_LIMIT = 800;
@@ -123,25 +124,6 @@ function isToday(date: string): boolean {
 function nowMinutes(): number {
   const now = new Date();
   return now.getHours() * 60 + now.getMinutes();
-}
-
-function formatDate(iso: string): string {
-  const [y, m, d] = iso.split('-');
-  return `${d}/${m}/${y}`;
-}
-
-function formatTime(min: number): string {
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-}
-
-const WEEKDAYS = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
-
-function formatDayLabel(iso: string): string {
-  const [y, m, d] = iso.split('-').map(Number);
-  const date = new Date(Date.UTC(y, m - 1, d));
-  return `${WEEKDAYS[date.getUTCDay()]} ${d}`;
 }
 
 function computeDayItineraries(
@@ -274,12 +256,13 @@ export default function App() {
     dir: 'asc',
   });
   const [loading, setLoading] = useState(false);
+  const [loadingLabel, setLoadingLabel] = useState('Chargement…');
   const [error, setError] = useState<string | null>(null);
   const [focus, setFocus] = useState<MapPoint | null>(null);
   const [roulettePick, setRoulettePick] = useState<string | null>(null);
   const [rouletteLegs, setRouletteLegs] = useState<Leg[] | null>(null);
   const [postcardOpen, setPostcardOpen] = useState(false);
-  const [panelOpen, setPanelOpen] = useState(true);
+  const [panelOpen, setPanelOpen] = useState(() => window.innerWidth > 720);
   const [resizeToken, setResizeToken] = useState(0);
   const [sidebarWidth, setSidebarWidth] = useState(getInitialSidebarWidth);
   const sidebarDrag = useRef<{
@@ -344,6 +327,7 @@ export default function App() {
 
     let cancelled = false;
     setLoading(true);
+    setLoadingLabel('Recherche des disponibilités…');
     setError(null);
 
     const codes = selected.flatMap((s) => s.codes);
@@ -380,6 +364,7 @@ export default function App() {
 
     let cancelled = false;
     setLoading(true);
+    setLoadingLabel('Recherche des destinations…');
     setError(null);
 
     const codes = rayonOrigin.flatMap((s) => s.codes);
@@ -415,6 +400,7 @@ export default function App() {
 
     let cancelled = false;
     setLoading(true);
+    setLoadingLabel('Calcul du réseau…');
     setError(null);
 
     getHeatmapEdges(range.min, range.max)
@@ -449,6 +435,7 @@ export default function App() {
   const searchItinerary = useCallback(async () => {
     if (from.length === 0 || to.length === 0 || !dateFrom || !dateTo) return;
     setLoading(true);
+    setLoadingLabel('Calcul des itinéraires…');
     setError(null);
     try {
       const key = `${dateFrom}..${dateTo}`;
@@ -770,6 +757,7 @@ export default function App() {
 
   useEffect(() => {
     if (!heatmapPlaying || heatmapDates.length === 0) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const ms = HEATMAP_SPEED_MS[heatmapSpeed];
     const id = window.setInterval(() => {
       setHeatmapIndex((i) => (i >= heatmapDates.length - 1 ? 0 : i + 1));
@@ -1277,8 +1265,8 @@ export default function App() {
             [a.lat, a.lon],
             [b.lat, b.lon],
           ],
-          color: '#9aa4b2',
-          opacity: 0.2 + 0.6 * (link.count / maxCount),
+          color: heatColor(link.count / maxCount),
+          opacity: 0.35 + 0.65 * (link.count / maxCount),
         });
       }
       return lines;
@@ -1295,6 +1283,17 @@ export default function App() {
     return { lat: o.lat, lon: o.lon, radiusKm: rayonRadius };
   }, [mode, rayonOrigin, rayonRadius]);
 
+  const hasNoSelection =
+    mode === 'origin' || mode === 'challenges'
+      ? origin.length === 0
+      : mode === 'destination'
+        ? destination.length === 0
+        : mode === 'rayon'
+          ? rayonOrigin.length === 0
+          : mode === 'itinerary'
+            ? from.length === 0 && to.length === 0
+            : false;
+
   return (
     <div
       className="app"
@@ -1310,6 +1309,11 @@ export default function App() {
         </div>
 
         <ModeTabs mode={mode} onChange={handleModeChange} />
+        {hasNoSelection && (
+          <div className="hint">
+            Choisis une gare pour voir les trajets TGV MAX disponibles à la date choisie.
+          </div>
+        )}
 
         {mode === 'itinerary' && (
           <div className="field">
@@ -1340,37 +1344,6 @@ export default function App() {
             </select>
           </div>
         )}
-
-        {mode !== 'heatmap' &&
-          (range ? (
-            <DateRangePicker
-              from={dateFrom}
-              to={dateTo}
-              min={range.min}
-              max={range.max}
-              mode={tripKind === 'return' ? 'split' : 'range'}
-              label="Dates"
-              fromLabel="Aller"
-              toLabel="Retour"
-              onChange={({ from: f, to: t }) => {
-                setDateFrom(f);
-                setDateTo(t);
-              }}
-            />
-          ) : (
-            <div className="hint">Chargement…</div>
-          ))}
-
-        {mode !== 'rayon' &&
-          mode !== 'challenges' &&
-          mode !== 'heatmap' &&
-          !(mode === 'itinerary' && tripKind === 'return') && (
-            <TimeFilter
-              value={timeFilter}
-              onChange={setTimeFilter}
-              showKind={mode !== 'itinerary'}
-            />
-          )}
 
         {mode === 'origin' && (
           <StationMultiSelect
@@ -1491,16 +1464,17 @@ export default function App() {
         {mode === 'heatmap' && heatmapEdges != null && heatmapDates.length > 0 && (
           <div className="legend">
             <span>
-              <span className="swatch" style={{ background: AVAILABLE }} />
+              <span className="swatch" style={{ background: '#deebf7' }} />
               peu de départs
             </span>
             <span>
-              <span className="swatch" style={{ background: INTERMEDIATE }} />
+              <span className="swatch" style={{ background: '#6baed6' }} />
             </span>
             <span>
-              <span className="swatch" style={{ background: FIXED }} />
+              <span className="swatch" style={{ background: '#08519c' }} />
               beaucoup de départs
             </span>
+            <span>couleur = fréquence</span>
             <span>{heatmapCumulative ? 'cumulatif' : 'jour par jour'}</span>
           </div>
         )}
@@ -1523,11 +1497,14 @@ export default function App() {
               onChange={setTo}
               placeholder="Rechercher une gare…"
             />
-            <ItineraryControls
-              value={constraints}
-              onChange={setConstraints}
-              record={searchKind === 'record'}
-            />
+            <details className="field">
+              <summary>Options avancées</summary>
+              <ItineraryControls
+                value={constraints}
+                onChange={setConstraints}
+                record={searchKind === 'record'}
+              />
+            </details>
             <button
               className="primary"
               type="button"
@@ -1536,21 +1513,58 @@ export default function App() {
                 void searchItinerary();
               }}
             >
-              {tripKind === 'return'
-                ? 'Rechercher l’aller-retour'
-                : 'Rechercher un itinéraire'}
+              {loading
+                ? 'Recherche…'
+                : tripKind === 'return'
+                  ? 'Rechercher l’aller-retour'
+                  : 'Rechercher un itinéraire'}
             </button>
           </>
         )}
 
-        {loading && <div className="hint">Chargement…</div>}
+        {mode !== 'heatmap' &&
+          (range ? (
+            <DateRangePicker
+              from={dateFrom}
+              to={dateTo}
+              min={range.min}
+              max={range.max}
+              mode={tripKind === 'return' ? 'split' : 'range'}
+              label="Dates"
+              fromLabel="Aller"
+              toLabel="Retour"
+              onChange={({ from: f, to: t }) => {
+                setDateFrom(f);
+                setDateTo(t);
+              }}
+            />
+          ) : (
+            <div className="hint">Chargement…</div>
+          ))}
+
+        {mode !== 'rayon' &&
+          mode !== 'challenges' &&
+          mode !== 'heatmap' &&
+          !(mode === 'itinerary' && tripKind === 'return') && (
+            <TimeFilter
+              value={timeFilter}
+              onChange={setTimeFilter}
+              showKind={mode !== 'itinerary'}
+            />
+          )}
+
+        {loading && (
+          <div className="hint" role="status" aria-live="polite">
+            {loadingLabel}
+          </div>
+        )}
         {error && (
-          <div className="hint" style={{ color: '#e3000f' }}>
+          <div className="hint" style={{ color: 'var(--accent)' }} role="alert">
             {error}
           </div>
         )}
         {geo.state.error && (
-          <div className="hint" style={{ color: '#e3000f' }}>
+          <div className="hint" style={{ color: 'var(--accent)' }} role="alert">
             {geo.state.error}
           </div>
         )}
@@ -1750,6 +1764,10 @@ export default function App() {
           visibleLegs.length > 0 && (
             <div className="legend">
               <span>
+                <span className="swatch" style={{ background: FIXED }} />
+                gare de départ
+              </span>
+              <span>
                 <span className="swatch" style={{ background: AVAILABLE }} />
                 disponible
               </span>
@@ -1770,6 +1788,35 @@ export default function App() {
         role="separator"
         aria-orientation="vertical"
         aria-label="Redimensionner le panneau"
+        aria-valuenow={sidebarWidth}
+        aria-valuemin={SIDEBAR_MIN}
+        aria-valuemax={SIDEBAR_MAX}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            e.preventDefault();
+            const next = clampSidebarWidth(
+              sidebarWidth + (e.key === 'ArrowRight' ? 16 : -16),
+            );
+            setSidebarWidth(next);
+            localStorage.setItem(SIDEBAR_STORAGE_KEY, String(next));
+            setResizeToken((t) => t + 1);
+          } else if (e.key === 'Home') {
+            e.preventDefault();
+            setSidebarWidth(SIDEBAR_MIN);
+            localStorage.setItem(SIDEBAR_STORAGE_KEY, String(SIDEBAR_MIN));
+            setResizeToken((t) => t + 1);
+          } else if (e.key === 'End') {
+            e.preventDefault();
+            const max = Math.max(
+              SIDEBAR_MIN,
+              Math.min(SIDEBAR_MAX, window.innerWidth - 120),
+            );
+            setSidebarWidth(max);
+            localStorage.setItem(SIDEBAR_STORAGE_KEY, String(max));
+            setResizeToken((t) => t + 1);
+          }
+        }}
         onPointerDown={handleResizeStart}
         onPointerMove={handleResizeMove}
         onPointerUp={handleResizeEnd}
@@ -1784,7 +1831,7 @@ export default function App() {
           focus={focus}
           focusZoom={10}
           focusDuration={1.2}
-          fit
+          fit={!(mode === 'heatmap' && heatmapPlaying)}
           dark={theme === 'dark'}
           resizeToken={resizeToken}
           radiusCircle={radiusCircle}
