@@ -1,12 +1,17 @@
+import { formatDuration } from '../lib/itinerary';
+
 export interface ItineraryConstraints {
   maxConnections: number;
   minConnection: number;
   maxConnection: number;
+  maxDuration: number;
 }
 
 export interface ItineraryControlsProps {
   value: ItineraryConstraints;
   onChange: (value: ItineraryConstraints) => void;
+  /** Record mode raises the connection ceiling and exposes a duration budget. */
+  record?: boolean;
 }
 
 function Slider(props: {
@@ -17,12 +22,14 @@ function Slider(props: {
   step: number;
   unit: string;
   onChange: (value: number) => void;
+  formatValue?: (value: number) => string;
 }): JSX.Element {
-  const { label, value, min, max, step, unit, onChange } = props;
+  const { label, value, min, max, step, unit, onChange, formatValue } = props;
   return (
     <div className="field">
       <label>
-        {label} : <span className="muted">{value}</span> {unit}
+        {label} :{' '}
+        <span className="muted">{formatValue ? formatValue(value) : `${value} ${unit}`}</span>
       </label>
       <input
         type="range"
@@ -40,6 +47,7 @@ function Slider(props: {
 export default function ItineraryControls({
   value,
   onChange,
+  record = false,
 }: ItineraryControlsProps): JSX.Element {
   return (
     <div>
@@ -47,7 +55,7 @@ export default function ItineraryControls({
         label="Correspondances max"
         value={value.maxConnections}
         min={0}
-        max={2}
+        max={record ? 8 : 2}
         step={1}
         unit=""
         onChange={(v) => onChange({ ...value, maxConnections: v })}
@@ -70,6 +78,18 @@ export default function ItineraryControls({
         unit="min"
         onChange={(v) => onChange({ ...value, maxConnection: v })}
       />
+      {record && (
+        <Slider
+          label="Durée max"
+          value={value.maxDuration}
+          min={120}
+          max={1440}
+          step={30}
+          unit="min"
+          formatValue={formatDuration}
+          onChange={(v) => onChange({ ...value, maxDuration: v })}
+        />
+      )}
     </div>
   );
 }

@@ -1,12 +1,14 @@
 import 'leaflet/dist/leaflet.css';
-import { useEffect, useMemo, useRef, type MutableRefObject } from 'react';
-import { CircleMarker, MapContainer, Polyline, Popup, TileLayer, useMap } from 'react-leaflet';
+import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
+import { Circle, CircleMarker, MapContainer, Polyline, Popup, TileLayer, useMap } from 'react-leaflet';
 import * as L from 'leaflet';
-import type { MapPoint } from '../types';
+import type { MapPoint, RadiusCircle } from '../types';
+import StationPopup from './StationPopup';
 
 export interface MapLine {
   points: [number, number][];
   color?: string;
+  opacity?: number;
 }
 
 interface StationMapProps {
@@ -15,8 +17,11 @@ interface StationMapProps {
   onPointClick?: (code: string) => void;
   lines?: MapLine[];
   focus?: MapPoint | null;
+  focusZoom?: number;
+  focusDuration?: number;
   dark?: boolean;
   resizeToken?: number;
+  radiusCircle?: RadiusCircle | null;
 }
 
 interface FitBoundsProps {
@@ -43,17 +48,28 @@ function FitBounds({ points, fit }: FitBoundsProps) {
 
 interface FocusControllerProps {
   focus: MapPoint | null;
+  focusZoom?: number;
+  focusDuration?: number;
   markersRef: MutableRefObject<Map<string, L.CircleMarker>>;
 }
 
-function FocusController({ focus, markersRef }: FocusControllerProps) {
+function FocusController({
+  focus,
+  focusZoom,
+  focusDuration,
+  markersRef,
+}: FocusControllerProps) {
   const map = useMap();
 
   useEffect(() => {
     if (!focus) return;
-    map.flyTo([focus.lat, focus.lon], Math.max(map.getZoom(), 9), { duration: 0.8 });
+    map.flyTo(
+      [focus.lat, focus.lon],
+      Math.max(map.getZoom(), focusZoom ?? 9),
+      { duration: focusDuration ?? 0.8 },
+    );
     markersRef.current.get(focus.code)?.openPopup();
-  }, [focus]);
+  }, [focus, focusZoom, focusDuration, map, markersRef]);
 
   return null;
 }
@@ -78,6 +94,44 @@ function markerRadius(count?: number): number {
   return Math.min(6 + Math.sqrt(count) * 1.3, 20);
 }
 
+interface StationMarkerProps {
+  point: MapPoint;
+  markersRef: MutableRefObject<Map<string, L.CircleMarker>>;
+  onPointClick?: (code: string) => void;
+}
+
+function StationMarker({ point, markersRef, onPointClick }: StationMarkerProps) {
+  const [opened, setOpened] = useState(false);
+  const color = point.color ?? '#e3000f';
+
+  return (
+    <CircleMarker
+      key={point.code}
+      ref={(el) => {
+        if (el) markersRef.current.set(point.code, el);
+        else markersRef.current.delete(point.code);
+      }}
+      center={[point.lat, point.lon] as [number, number]}
+      radius={markerRadius(point.count)}
+      pathOptions={{
+        color,
+        fillColor: color,
+        fillOpacity: point.opacity ?? 0.6,
+        weight: 2,
+      }}
+      eventHandlers={{
+        click: () => onPointClick?.(point.code),
+        popupopen: () => setOpened(true),
+        popupclose: () => setOpened(false),
+      }}
+    >
+      <Popup>
+        <StationPopup point={point} opened={opened} />
+      </Popup>
+    </CircleMarker>
+  );
+}
+
 /** Interactive Leaflet map of France showing TGV MAX stations, lines and focus. */
 export default function StationMap({
   points,
@@ -85,48 +139,24 @@ export default function StationMap({
   onPointClick,
   lines = [],
   focus = null,
+  focusZoom,
+  focusDuration,
   dark = false,
   resizeToken,
+  radiusCircle = null,
 }: StationMapProps) {
   const markersRef = useRef<Map<string, L.CircleMarker>>(new Map());
 
   const markers = useMemo(
     () =>
-      points.map((point) => {
-        const color = point.color ?? '#e3000f';
-        return (
-          <CircleMarker
-            key={point.code}
-            ref={(el) => {
-              if (el) markersRef.current.set(point.code, el);
-              else markersRef.current.delete(point.code);
-            }}
-            center={[point.lat, point.lon] as [number, number]}
-            radius={markerRadius(point.count)}
-            pathOptions={{
-              color,
-              fillColor: color,
-              fillOpacity: 0.6,
-              weight: 2,
-            }}
-            eventHandlers={{ click: () => onPointClick?.(point.code) }}
-          >
-            <Popup>
-              <div>
-                <div>
-                  <strong>{point.name}</strong>
-                  {point.count !== undefined && point.count > 0 ? (
-                    <span> · {point.count} départs</span>
-                  ) : null}
-                </div>
-                {point.popup ? (
-                  <div dangerouslySetInnerHTML={{ __html: point.popup }} />
-                ) : null}
-              </div>
-            </Popup>
-          </CircleMarker>
-        );
-      }),
+      points.map((point) => (
+        <StationMarker
+          key={point.code}
+          point={point}
+          markersRef={markersRef}
+          onPointClick={onPointClick}
+        />
+      )),
     [points, onPointClick],
   );
 
@@ -150,6 +180,18 @@ export default function StationMap({
         />
       )}
       <FitBounds points={points} fit={fit} />
+      {radiusCircle && (
+        <Circle
+          center={[radiusCircle.lat, radiusCircle.lon] as [number, number]}
+          radius={radiusCircle.radiusKm * 1000}
+          pathOptions={{
+            color: '#e3000f',
+            fillColor: '#e3000f',
+            fillOpacity: 0.12,
+            weight: 2,
+          }}
+        />
+      )}
       {lines.map((line, i) => (
         <Polyline
           key={i}
@@ -157,13 +199,18 @@ export default function StationMap({
           pathOptions={{
             color: line.color ?? '#b26a00',
             weight: 2,
-            opacity: 0.8,
+            opacity: line.opacity ?? 0.8,
             dashArray: '4 4',
           }}
         />
       ))}
       {markers}
-      <FocusController focus={focus} markersRef={markersRef} />
+      <FocusController
+        focus={focus}
+        focusZoom={focusZoom}
+        focusDuration={focusDuration}
+        markersRef={markersRef}
+      />
       <ResizeController resizeToken={resizeToken} />
     </MapContainer>
   );

@@ -183,6 +183,41 @@ export async function getAvailableStations(
   return stations;
 }
 
+/**
+ * Lightweight OUI edges over a date range for the heatmap (reduced CSV select:
+ * only date + codes, no names/times/train_no). Reuses the same export endpoint
+ * and CSV parser as {@link getRangeEdges} but returns a much smaller payload.
+ */
+export async function getHeatmapEdges(from: string, to: string): Promise<Edge[]> {
+  const params = new URLSearchParams({
+    select: 'date,origine_iata,destination_iata',
+    where: `${dateRangeClause(from, to)} AND od_happy_card="OUI"`,
+  });
+  const url = `${API_BASE}/exports/csv?${params.toString()}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`tgvmax CSV ${res.status} ${res.statusText}`);
+  }
+  const text = await res.text();
+  const rows = parseCsv(text);
+
+  const edges: Edge[] = [];
+  for (const row of rows.slice(1)) {
+    if (row.length < 3) continue;
+    edges.push({
+      date: row[0],
+      from: row[1],
+      to: row[2],
+      fromName: '',
+      toName: '',
+      dep: 0,
+      arr: 0,
+      trainNo: '',
+    });
+  }
+  return edges;
+}
+
 /** OUI edges over a date range as a normalized graph for itinerary search. */
 export async function getRangeEdges(from: string, to: string): Promise<Edge[]> {
   const params = new URLSearchParams({

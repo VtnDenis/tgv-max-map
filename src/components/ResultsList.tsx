@@ -91,12 +91,17 @@ export function ItineraryList(props: {
   itineraries: Itinerary[];
   onSelect?: (itinerary: Itinerary) => void;
   selected?: Itinerary | null;
+  recordMode?: boolean;
 }): JSX.Element {
-  const { itineraries, onSelect, selected = null } = props;
+  const { itineraries, onSelect, selected = null, recordMode = false } = props;
 
   if (itineraries.length === 0) {
     return <div className="hint">Aucun itinéraire trouvé.</div>;
   }
+
+  const maxConnections = recordMode
+    ? Math.max(...itineraries.map((it) => it.legs.length - 1))
+    : -1;
 
   return (
     <div className="results">
@@ -108,9 +113,10 @@ export function ItineraryList(props: {
             : `${connections} correspondance${connections > 1 ? 's' : ''}`;
         const duration = itinerary.arrivalTime - itinerary.departureTime;
         const isSelected = selected === itinerary;
+        const isRecord = recordMode && connections === maxConnections && connections > 0;
         return (
           <div
-            className={`result-card clickable${isSelected ? ' selected' : ''}`}
+            className={`result-card clickable${isSelected ? ' selected' : ''}${isRecord ? ' record' : ''}`}
             key={i}
             role="button"
             tabIndex={0}
@@ -122,6 +128,7 @@ export function ItineraryList(props: {
             <div className="row">
               <span className="time">{formatMinutes(itinerary.departureTime)}</span>
               <span className="badge leg">{badge}</span>
+              {isRecord && <span className="badge record-badge">record</span>}
               <span className="time">{formatMinutes(itinerary.arrivalTime)}</span>
             </div>
             <div className="row">

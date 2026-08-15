@@ -75,6 +75,68 @@ export interface MapPoint {
   color?: string; // CSS color for the marker
   popup?: string; // HTML content for the Leaflet popup
   count?: number; // number of departures (drives marker size)
+  opacity?: number; // fill opacity override (heat intensity)
+  intensity?: number; // 0..1 heat intensity (drives color/size)
 }
 
-export type Mode = 'origin' | 'destination' | 'itinerary';
+export type Mode =
+  | 'origin'
+  | 'destination'
+  | 'itinerary'
+  | 'rayon'
+  | 'challenges'
+  | 'heatmap';
+
+/** A distinct origin→destination pair with its aggregated trip count. */
+export interface HeatmapLink {
+  from: string;
+  to: string;
+  count: number;
+}
+
+/** Aggregated availability for a single day of the heatmap. */
+export interface DayAggregate {
+  origins: Map<string, number>;
+  destinations: Map<string, number>;
+  links: Map<string, HeatmapLink>;
+}
+
+/** A circle overlay drawn around an origin station (radius map mode). */
+export interface RadiusCircle {
+  lat: number;
+  lon: number;
+  radiusKm: number;
+}
+
+/** Identifier of a predefined challenge in the treasure-hunt mode. */
+export type ChallengeKind =
+  | 'far-direct'
+  | 'longest-under-3h'
+  | 'most-departures'
+  | 'earliest-departure'
+  | 'most-days'
+  | 'longest-itinerary';
+
+/** Lifecycle state of a challenge card in the sidebar. */
+export type ChallengeStatus = 'pending' | 'solved' | 'empty';
+
+/** The computed answer to a single challenge. */
+export interface ChallengeResult {
+  kind: ChallengeKind;
+  title: string;
+  description: string;
+  status: ChallengeStatus;
+  /** Winning station (pinnable on the map), null when unsolved/unavailable. */
+  winner: Station | null;
+  winnerCode?: string;
+  /** Numeric value shown in the answer (km, minutes, departures, days...). */
+  metric?: number;
+  /** Human-readable label describing the winning metric. */
+  detail?: string;
+  /** Direct legs justifying the answer (for popup content). */
+  legs?: Leg[];
+  /** Last edge of the winning itinerary (longest-itinerary challenge). */
+  edge?: Edge;
+  /** Full winning itinerary (longest-itinerary challenge). */
+  itinerary?: Itinerary;
+}

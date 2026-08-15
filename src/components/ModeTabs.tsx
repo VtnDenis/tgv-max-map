@@ -14,12 +14,15 @@ const TABS: Tab[] = [
   { mode: 'origin', label: 'Depuis une gare' },
   { mode: 'destination', label: 'Vers une gare' },
   { mode: 'itinerary', label: 'Itinéraire' },
+  { mode: 'rayon', label: 'Carte rayon' },
+  { mode: 'challenges', label: 'Défis' },
+  { mode: 'heatmap', label: 'Chauffe' },
 ];
 
 /** Tab selector for choosing the map's interaction mode. */
 export default function ModeTabs({ mode, onChange }: ModeTabsProps): JSX.Element {
   return (
-    <div className="tabs">
+    <div className="tabs mode-tabs">
       {TABS.map((tab) => (
         <button
           key={tab.mode}
