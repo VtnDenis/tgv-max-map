@@ -36,7 +36,7 @@ import {
 import { computeChallenges, computeLongestItinerary } from './lib/challenges';
 import { formatDate, formatDayLabel, formatFare, formatTime } from './lib/format';
 import { getFareRange } from './lib/fares';
-import { findNextWeekend, WEEKEND_EVENING_MIN } from './lib/weekend';
+import { findNextWeekend, WEEKEND_ARRIVAL_NOON, WEEKEND_EVENING_MIN } from './lib/weekend';
 import type { WeekendPostcard } from './lib/postcard';
 import StationMap, { type MapLine } from './components/StationMap';
 import { ItineraryList, LegList } from './components/ResultsList';
@@ -1000,8 +1000,10 @@ export default function App() {
       const originCodes = new Set(origin.flatMap((s) => s.codes));
       const outbounds = new Map<string, Edge[]>();
       for (const edge of edges) {
-        if (edge.date !== weekend.friday) continue;
-        if (edge.dep < WEEKEND_EVENING_MIN) continue;
+        const isOutbound =
+          (edge.date === weekend.friday && edge.dep >= WEEKEND_EVENING_MIN) ||
+          (edge.date === weekend.saturday && edge.arr < WEEKEND_ARRIVAL_NOON);
+        if (!isOutbound) continue;
         if (originCodes.has(edge.from)) {
           const list = outbounds.get(edge.to);
           if (list) list.push(edge);
@@ -1070,7 +1072,7 @@ export default function App() {
         legs: [weekendProgram.outbound],
         departureTime: weekendProgram.outbound.dep,
         arrivalTime: weekendProgram.outbound.arr,
-        date: weekendProgram.friday,
+        date: weekendProgram.outbound.date ?? weekendProgram.friday,
       },
       inbound: {
         legs: [weekendProgram.inbound],

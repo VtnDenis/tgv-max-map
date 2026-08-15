@@ -1,4 +1,5 @@
 import type { WeekendProgram } from '../types';
+import { formatDayLabel } from '../lib/format';
 
 function formatTime(min: number): string {
   const h = Math.floor(min / 60);
@@ -54,7 +55,9 @@ export default function WeekendProgram({
       </div>
 
       <div className="weekend-leg">
-        <div className="weekend-leg-label">Aller</div>
+        <div className="weekend-leg-label">
+          Aller{program.outbound.date ? ` · ${formatDayLabel(program.outbound.date)}` : ''}
+        </div>
         <div className="row">
           <span className="station">
             {program.outbound.fromName} → {program.outbound.toName}
@@ -69,7 +72,9 @@ export default function WeekendProgram({
       </div>
 
       <div className="weekend-leg">
-        <div className="weekend-leg-label">Retour</div>
+        <div className="weekend-leg-label">
+          Retour{program.inbound.date ? ` · ${formatDayLabel(program.inbound.date)}` : ''}
+        </div>
         <div className="row">
           <span className="station">
             {program.inbound.fromName} → {program.inbound.toName}

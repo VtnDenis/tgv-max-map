@@ -3,8 +3,12 @@ import type { DateRange } from '../types';
 /** Départs considérés comme « en soirée » (vendredi/dimanche). */
 export const WEEKEND_EVENING_MIN = 16 * 60;
 
+/** Arrivée limite le samedi matin (midi). */
+export const WEEKEND_ARRIVAL_NOON = 12 * 60;
+
 export interface WeekendDates {
   friday: string;
+  saturday: string;
   sunday: string;
 }
 
@@ -43,7 +47,8 @@ export function findNextWeekend(range: DateRange): WeekendDates | null {
   const today = todayIso();
   const add = (5 - dayOfWeek(today) + 7) % 7;
   const friday = addDays(today, add);
+  const saturday = addDays(friday, 1);
   const sunday = addDays(friday, 2);
   if (friday > range.max || sunday > range.max) return null;
-  return { friday, sunday };
+  return { friday, saturday, sunday };
 }
