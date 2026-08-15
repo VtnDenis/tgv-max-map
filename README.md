@@ -13,14 +13,20 @@ Trois modes :
 - **Itinéraire** — recherche automatique de trajets multi-étapes (jusqu'à 3 trains / 2 correspondances) entre plusieurs départs et plusieurs arrivées, avec :
   - onglets de filtrage par nombre de correspondances (direct, 1, 2…) ;
   - tri des résultats (départ, arrivée, durée, correspondances — croissant/décroissant) ;
-  - temps de correspondance min/max et nombre de correspondances configurables (sliders).
+  - temps de correspondance min/max et nombre de correspondances configurables (sliders) ;
+  - mode **aller simple** (plage de dates) ou **aller-retour** (date aller + date retour), avec filtres horaires départ/arrivée **indépendants** par sens et filtrage des retours postérieurs au trajet aller sélectionné.
 
 Et aussi :
 
-- **Filtre horaire** : plage de départ **et/ou** d'arrivée (sliders à double poignée) ; si la date du jour est sélectionnée, seuls les trains non encore partis sont affichés.
+- **Recherche multi-jours** : sélection d'une plage de dates (calendrier à double poignée, plafond 14 jours) ; en « Depuis / Vers », onglets par jour pour filtrer les disponibilités.
+- **Filtre horaire** : plage de départ **et/ou** d'arrivée (sliders à double poignée) ; si la date du jour est incluse, seuls les trains non encore partis sont affichés.
+- **Durée de trajet** affichée dans les popups et les cartes de résultats.
 - **Multi-ville** : bouton « + » pour ajouter autant de gares que souhaité dans chaque champ.
 - **Suggestions de proximité** : taper « Paris » suggère aussi Massy TGV, Marne-la-Vallée, Roissy CDG… (rayon de 40 km).
+- **Géolocalisation** : bouton 📍 pour sélectionner la gare la plus proche (natif navigateur, HTTPS requis).
+- **Heatmap** : taille des marqueurs proportionnelle au nombre de départs vers chaque destination.
 - **Carte interactive** : marqueurs, polylignes, popups, clic sidebar → recentrage sur la carte.
+- **Responsive mobile** : panneau latéral repliable par-dessus la carte.
 - **Mode sombre** (défaut = préférence système, mémorisé).
 
 ## Stack technique
@@ -64,12 +70,13 @@ Le jeu de données ne contient pas de coordonnées. Les gares sont géoréféren
 ```
 src/
   api/tgvmax.ts            client Opendatasoft Explore v2.1
-  lib/geo.ts               géocodage, lookup, haversine
-  lib/itinerary.ts         recherche multi-étapes (BFS)
+  lib/geo.ts               géocodage, lookup, haversine, gare la plus proche
+  lib/itinerary.ts         recherche multi-étapes (BFS) + durée
   data/stations.json       gares → lat/lon
+  hooks/useGeolocation.ts  géolocalisation navigateur
   components/              StationMap, StationMultiSelect, TimeFilter,
                            RangeSlider, ResultsList, ItineraryControls,
-                           DatePicker, ModeTabs, ThemeToggle
+                           DateRangePicker, ModeTabs, ThemeToggle
   App.tsx                  orchestration des 3 modes
 scripts/build-stations.mjs régénération du géocodage
 ```

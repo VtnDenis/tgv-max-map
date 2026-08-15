@@ -161,6 +161,11 @@ export default function App() {
     arrival: { min: 0, max: 24 * 60 - 1 },
     kind: 'departure',
   });
+  const [returnTimeFilter, setReturnTimeFilter] = useState<TimeFilterValue>({
+    departure: { min: 0, max: 24 * 60 - 1 },
+    arrival: { min: 0, max: 24 * 60 - 1 },
+    kind: 'departure',
+  });
   const [selectedOutbound, setSelectedOutbound] = useState<Itinerary | null>(null);
   const [selectedReturn, setSelectedReturn] = useState<Itinerary | null>(null);
   const [connectionTab, setConnectionTab] = useState<number | 'all'>('all');
@@ -341,10 +346,10 @@ export default function App() {
 
     let filtered = found.filter((it) => {
       return (
-        it.departureTime >= timeFilter.departure.min &&
-        it.departureTime <= timeFilter.departure.max &&
-        it.arrivalTime >= timeFilter.arrival.min &&
-        it.arrivalTime <= timeFilter.arrival.max
+        it.departureTime >= returnTimeFilter.departure.min &&
+        it.departureTime <= returnTimeFilter.departure.max &&
+        it.arrivalTime >= returnTimeFilter.arrival.min &&
+        it.arrivalTime <= returnTimeFilter.arrival.max
       );
     });
 
@@ -359,7 +364,7 @@ export default function App() {
 
     filtered.sort((a, b) => a.arrivalTime - b.arrivalTime);
     return filtered.slice(0, MAX_ITINERARIES);
-  }, [edges, from, to, constraints, timeFilter, tripKind, dateTo, selectedOutbound]);
+  }, [edges, from, to, constraints, returnTimeFilter, tripKind, dateTo, selectedOutbound]);
 
   const activeItineraries = useMemo<Itinerary[] | null>(
     () => (directionTab === 'return' ? returnItineraries : itineraries),
@@ -738,11 +743,13 @@ export default function App() {
           <div className="hint">Chargement…</div>
         )}
 
-        <TimeFilter
-          value={timeFilter}
-          onChange={setTimeFilter}
-          showKind={mode !== 'itinerary'}
-        />
+        {!(mode === 'itinerary' && tripKind === 'return') && (
+          <TimeFilter
+            value={timeFilter}
+            onChange={setTimeFilter}
+            showKind={mode !== 'itinerary'}
+          />
+        )}
 
         {mode === 'origin' && (
           <StationMultiSelect
@@ -876,26 +883,35 @@ export default function App() {
         )}
         {mode === 'itinerary' && activeItineraries != null && (
           <>
+            {tripKind === 'return' && (
+              <>
+                <div className="tabs">
+                  <button
+                    type="button"
+                    className={directionTab === 'outbound' ? 'active' : undefined}
+                    onClick={() => setDirectionTab('outbound')}
+                  >
+                    Aller ({itineraries?.length ?? 0})
+                  </button>
+                  <button
+                    type="button"
+                    className={directionTab === 'return' ? 'active' : undefined}
+                    onClick={() => setDirectionTab('return')}
+                  >
+                    Retour ({returnItineraries?.length ?? 0})
+                  </button>
+                </div>
+                <TimeFilter
+                  value={directionTab === 'return' ? returnTimeFilter : timeFilter}
+                  onChange={
+                    directionTab === 'return' ? setReturnTimeFilter : setTimeFilter
+                  }
+                  showKind={false}
+                />
+              </>
+            )}
             {activeItineraries.length > 0 && (
               <>
-                {tripKind === 'return' && (
-                  <div className="tabs">
-                    <button
-                      type="button"
-                      className={directionTab === 'outbound' ? 'active' : undefined}
-                      onClick={() => setDirectionTab('outbound')}
-                    >
-                      Aller ({itineraries?.length ?? 0})
-                    </button>
-                    <button
-                      type="button"
-                      className={directionTab === 'return' ? 'active' : undefined}
-                      onClick={() => setDirectionTab('return')}
-                    >
-                      Retour ({returnItineraries?.length ?? 0})
-                    </button>
-                  </div>
-                )}
                 <div className="tabs">
                   <button
                     type="button"
