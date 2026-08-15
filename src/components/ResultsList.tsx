@@ -1,9 +1,14 @@
 import type { Itinerary, Leg } from '../types';
+import { formatDuration, toMinutes } from '../lib/itinerary';
 
 function formatMinutes(min: number): string {
   const h = Math.floor(min / 60);
   const m = min % 60;
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+function distinctDays(legs: Leg[]): number {
+  return new Set(legs.map((leg) => leg.date).filter(Boolean)).size;
 }
 
 export function LegList(props: {
@@ -15,7 +20,7 @@ export function LegList(props: {
   const { legs, fixedName, mode, onSelect } = props;
 
   if (legs.length === 0) {
-    return <div className="hint">Aucune disponibilité MAX ce jour pour cette gare.</div>;
+    return <div className="hint">Aucune disponibilité MAX sur la période pour cette gare.</div>;
   }
 
   const groups = new Map<string, Leg[]>();
@@ -28,6 +33,7 @@ export function LegList(props: {
 
   const entries = [...groups.entries()];
   entries.sort((a, b) =>
+    (a[1][0].date ?? '').localeCompare(b[1][0].date ?? '') ||
     a[1][0].heure_depart.localeCompare(b[1][0].heure_depart),
   );
 
@@ -42,6 +48,7 @@ export function LegList(props: {
       </div>
       {entries.map(([code, list]) => {
         const name = mode === 'origin' ? list[0].destination : list[0].origine;
+        const days = distinctDays(list);
         return (
           <div
             className="result-card clickable"
@@ -53,13 +60,24 @@ export function LegList(props: {
               if (e.key === 'Enter') onSelect?.(code);
             }}
           >
-            <div className="station">{name}</div>
+            <div className="row">
+              <div className="station">{name}</div>
+              {days > 1 && (
+                <span className="badge ok">{days} jours dispo</span>
+              )}
+            </div>
             {list.map((leg, i) => (
               <div className="row" key={i}>
                 <span className="time">
+                  {leg.date ? `${leg.date} · ` : ''}
                   {leg.heure_depart} → {leg.heure_arrivee}
                 </span>
                 {leg.train_no ? <span className="badge leg">{leg.train_no}</span> : null}
+                <span className="muted">
+                  {formatDuration(
+                    toMinutes(leg.heure_arrivee) - toMinutes(leg.heure_depart),
+                  )}
+                </span>
               </div>
             ))}
           </div>
@@ -88,6 +106,7 @@ export function ItineraryList(props: {
           connections === 0
             ? 'direct'
             : `${connections} correspondance${connections > 1 ? 's' : ''}`;
+        const duration = itinerary.arrivalTime - itinerary.departureTime;
         const isSelected = selected === i;
         return (
           <div
@@ -104,6 +123,10 @@ export function ItineraryList(props: {
               <span className="time">{formatMinutes(itinerary.departureTime)}</span>
               <span className="badge leg">{badge}</span>
               <span className="time">{formatMinutes(itinerary.arrivalTime)}</span>
+            </div>
+            <div className="row">
+              <span className="muted">{formatDuration(duration)}</span>
+              {itinerary.date ? <span className="badge ok">{itinerary.date}</span> : null}
             </div>
             {itinerary.legs.map((leg, j) => (
               <div className="muted" key={j}>

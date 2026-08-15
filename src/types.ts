@@ -30,6 +30,7 @@ export interface Station {
 
 /** A scheduled journey leg (origin -> destination) with times. */
 export interface Leg {
+  date?: string; // "YYYY-MM-DD"
   origine: string;
   origine_iata: string;
   destination: string;
@@ -48,6 +49,7 @@ export interface Edge {
   dep: number; // minutes since midnight
   arr: number; // minutes since midnight
   trainNo: string;
+  date?: string; // "YYYY-MM-DD"
 }
 
 /** A connected multi-leg itinerary. */
@@ -55,6 +57,7 @@ export interface Itinerary {
   legs: Edge[];
   departureTime: number; // minutes since midnight
   arrivalTime: number; // minutes since midnight
+  date?: string; // "YYYY-MM-DD"
 }
 
 /** Date range covered by the dataset (30-day rolling window). */
@@ -71,6 +74,7 @@ export interface MapPoint {
   lon: number;
   color?: string; // CSS color for the marker
   popup?: string; // HTML content for the Leaflet popup
+  count?: number; // number of departures (drives marker size)
 }
 
 export type Mode = 'origin' | 'destination' | 'itinerary';

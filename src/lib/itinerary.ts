@@ -16,6 +16,15 @@ export function toMinutes(hhmm: string): number {
   return (Number.isNaN(hours) ? 0 : hours) * 60 + (Number.isNaN(minutes) ? 0 : minutes);
 }
 
+/** Format a duration in minutes as a compact "2h34" string. */
+export function formatDuration(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m}min`;
+  if (m === 0) return `${h}h`;
+  return `${h}h${String(m).padStart(2, '0')}`;
+}
+
 /** Find all connecting itineraries between any start in `from` and any end in `to`, within `maxLegs` legs. */
 export function findItineraries(edges: Edge[], from: string[], to: string[], options?: ItineraryOptions): Itinerary[] {
   const maxLegs = options?.maxLegs ?? 3;

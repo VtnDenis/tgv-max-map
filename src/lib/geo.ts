@@ -76,6 +76,20 @@ export function canonicalCode(code: string): string {
   return STATION_BY_CODE.get(code)?.code ?? code;
 }
 
+/** Return the station group closest to a lat/lon position. */
+export function nearestStation(lat: number, lon: number): Station | undefined {
+  let best: Station | undefined;
+  let bestDistance = Number.POSITIVE_INFINITY;
+  for (const station of STATIONS) {
+    const d = haversineKm(lat, lon, station.lat, station.lon);
+    if (d < bestDistance) {
+      bestDistance = d;
+      best = station;
+    }
+  }
+  return best;
+}
+
 /** Return stations matching `query` on name or code, ranked by relevance. */
 export function searchStations(query: string, limit = 20): Station[] {
   const needle = normalize(query.trim());

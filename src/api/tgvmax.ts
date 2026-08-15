@@ -113,7 +113,10 @@ async function fetchAllLegs(params: URLSearchParams): Promise<Leg[]> {
     }
     offset += LIMIT;
   }
-  collected.sort((a, b) => a.heure_depart.localeCompare(b.heure_depart));
+  collected.sort((a, b) =>
+    (a.date ?? '').localeCompare(b.date ?? '') ||
+    a.heure_depart.localeCompare(b.heure_depart),
+  );
   return collected;
 }
 
@@ -121,26 +124,34 @@ function quoteList(codes: string[]): string {
   return codes.map((code) => `'${code}'`).join(',');
 }
 
-/** All OUI destinations reachable from given origins on a date. */
+function dateRangeClause(from: string, to: string): string {
+  return from === to
+    ? `date=date'${from}'`
+    : `date>=date'${from}' AND date<=date'${to}'`;
+}
+
+/** All OUI destinations reachable from given origins over a date range. */
 export async function getDestinations(
-  date: string,
+  from: string,
+  to: string,
   originCodes: string[],
 ): Promise<Leg[]> {
   const params = new URLSearchParams({
-    select: 'origine,destination,origine_iata,destination_iata,heure_depart,heure_arrivee,train_no',
-    where: `date=date'${date}' AND origine_iata IN (${quoteList(originCodes)}) AND od_happy_card="OUI"`,
+    select: 'date,origine,destination,origine_iata,destination_iata,heure_depart,heure_arrivee,train_no',
+    where: `${dateRangeClause(from, to)} AND origine_iata IN (${quoteList(originCodes)}) AND od_happy_card="OUI"`,
   });
   return fetchAllLegs(params);
 }
 
-/** All OUI origins that can reach given destinations on a date. */
+/** All OUI origins that can reach given destinations over a date range. */
 export async function getOrigins(
-  date: string,
+  from: string,
+  to: string,
   destinationCodes: string[],
 ): Promise<Leg[]> {
   const params = new URLSearchParams({
-    select: 'origine,destination,origine_iata,destination_iata,heure_depart,heure_arrivee,train_no',
-    where: `date=date'${date}' AND destination_iata IN (${quoteList(destinationCodes)}) AND od_happy_card="OUI"`,
+    select: 'date,origine,destination,origine_iata,destination_iata,heure_depart,heure_arrivee,train_no',
+    where: `${dateRangeClause(from, to)} AND destination_iata IN (${quoteList(destinationCodes)}) AND od_happy_card="OUI"`,
   });
   return fetchAllLegs(params);
 }
@@ -172,11 +183,11 @@ export async function getAvailableStations(
   return stations;
 }
 
-/** Full-day OUI edges as a normalized graph for itinerary search. */
-export async function getDayEdges(date: string): Promise<Edge[]> {
+/** OUI edges over a date range as a normalized graph for itinerary search. */
+export async function getRangeEdges(from: string, to: string): Promise<Edge[]> {
   const params = new URLSearchParams({
-    select: 'origine_iata,destination_iata,origine,destination,heure_depart,heure_arrivee,train_no',
-    where: `date=date'${date}' AND od_happy_card="OUI"`,
+    select: 'date,origine_iata,destination_iata,origine,destination,heure_depart,heure_arrivee,train_no',
+    where: `${dateRangeClause(from, to)} AND od_happy_card="OUI"`,
   });
   const url = `${API_BASE}/exports/csv?${params.toString()}`;
   const res = await fetch(url);
@@ -188,15 +199,16 @@ export async function getDayEdges(date: string): Promise<Edge[]> {
 
   const edges: Edge[] = [];
   for (const row of rows.slice(1)) {
-    if (row.length < 7) continue;
+    if (row.length < 8) continue;
     edges.push({
-      from: row[0],
-      to: row[1],
-      fromName: row[2],
-      toName: row[3],
-      dep: toMinutes(row[4]),
-      arr: toMinutes(row[5]),
-      trainNo: row[6],
+      date: row[0],
+      from: row[1],
+      to: row[2],
+      fromName: row[3],
+      toName: row[4],
+      dep: toMinutes(row[5]),
+      arr: toMinutes(row[6]),
+      trainNo: row[7],
     });
   }
   return edges;

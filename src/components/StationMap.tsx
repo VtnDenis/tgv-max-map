@@ -16,6 +16,7 @@ interface StationMapProps {
   lines?: MapLine[];
   focus?: MapPoint | null;
   dark?: boolean;
+  resizeToken?: number;
 }
 
 interface FitBoundsProps {
@@ -57,6 +58,26 @@ function FocusController({ focus, markersRef }: FocusControllerProps) {
   return null;
 }
 
+interface ResizeControllerProps {
+  resizeToken?: number;
+}
+
+function ResizeController({ resizeToken }: ResizeControllerProps) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.invalidateSize();
+  }, [resizeToken, map]);
+
+  return null;
+}
+
+/** Radius (px) proportional to the number of departures, capped for legibility. */
+function markerRadius(count?: number): number {
+  if (count === undefined) return 7;
+  return Math.min(6 + Math.sqrt(count) * 1.3, 20);
+}
+
 /** Interactive Leaflet map of France showing TGV MAX stations, lines and focus. */
 export default function StationMap({
   points,
@@ -65,6 +86,7 @@ export default function StationMap({
   lines = [],
   focus = null,
   dark = false,
+  resizeToken,
 }: StationMapProps) {
   const markersRef = useRef<Map<string, L.CircleMarker>>(new Map());
 
@@ -80,7 +102,7 @@ export default function StationMap({
               else markersRef.current.delete(point.code);
             }}
             center={[point.lat, point.lon] as [number, number]}
-            radius={7}
+            radius={markerRadius(point.count)}
             pathOptions={{
               color,
               fillColor: color,
@@ -93,6 +115,9 @@ export default function StationMap({
               <div>
                 <div>
                   <strong>{point.name}</strong>
+                  {point.count !== undefined && point.count > 0 ? (
+                    <span> · {point.count} départs</span>
+                  ) : null}
                 </div>
                 {point.popup ? (
                   <div dangerouslySetInnerHTML={{ __html: point.popup }} />
@@ -139,6 +164,7 @@ export default function StationMap({
       ))}
       {markers}
       <FocusController focus={focus} markersRef={markersRef} />
+      <ResizeController resizeToken={resizeToken} />
     </MapContainer>
   );
 }

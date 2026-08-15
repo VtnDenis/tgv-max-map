@@ -10,15 +10,19 @@ import type {
 } from './types';
 import {
   getDateRange,
-  getDayEdges,
   getDestinations,
   getOrigins,
+  getRangeEdges,
 } from './api/tgvmax';
 import { canonicalCode, getAllStations, getStation } from './lib/geo';
-import { findItineraries, toMinutes } from './lib/itinerary';
+import {
+  findItineraries,
+  formatDuration,
+  toMinutes,
+} from './lib/itinerary';
 import StationMap, { type MapLine } from './components/StationMap';
 import { ItineraryList, LegList } from './components/ResultsList';
-import DatePicker from './components/DatePicker';
+import DateRangePicker from './components/DateRangePicker';
 import StationMultiSelect from './components/StationMultiSelect';
 import ModeTabs from './components/ModeTabs';
 import ItineraryControls, {
@@ -26,13 +30,18 @@ import ItineraryControls, {
 } from './components/ItineraryControls';
 import TimeFilter, { type TimeFilterValue } from './components/TimeFilter';
 import ThemeToggle from './components/ThemeToggle';
+import { useGeolocation } from './hooks/useGeolocation';
 
 const FIXED = '#e3000f';
 const AVAILABLE = '#0f9d58';
 const INTERMEDIATE = '#b26a00';
 
+const MAX_ITINERARIES = 500;
+
 type SortKey = 'departure' | 'arrival' | 'duration' | 'connections';
 type SortDir = 'asc' | 'desc';
+
+type GeoTarget = 'origin' | 'from' | null;
 
 function toErrorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
@@ -51,11 +60,20 @@ function nowMinutes(): number {
   return now.getHours() * 60 + now.getMinutes();
 }
 
+function formatDate(iso: string): string {
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
 function buildPopup(list: Leg[]): string {
   return list
     .map((leg) => {
       const train = leg.train_no ? ` · train ${leg.train_no}` : '';
-      return `${leg.heure_depart} → ${leg.heure_arrivee}${train}`;
+      const dur = formatDuration(
+        toMinutes(leg.heure_arrivee) - toMinutes(leg.heure_depart),
+      );
+      const day = leg.date ? `${formatDate(leg.date)} ` : '';
+      return `${day}${leg.heure_depart} → ${leg.heure_arrivee} (${dur})${train}`;
     })
     .join('<br/>');
 }
@@ -78,8 +96,9 @@ function canonicalizeEdges(edges: Edge[]): Edge[] {
 
 export default function App() {
   const [mode, setMode] = useState<Mode>('origin');
-  const [date, setDate] = useState('');
   const [range, setRange] = useState<DateRange | null>(null);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [origin, setOrigin] = useState<Station[]>([]);
   const [destination, setDestination] = useState<Station[]>([]);
   const [from, setFrom] = useState<Station[]>([]);
@@ -98,6 +117,7 @@ export default function App() {
   });
   const [selectedItinerary, setSelectedItinerary] = useState<number | null>(null);
   const [connectionTab, setConnectionTab] = useState<number | 'all'>('all');
+  const [dayTab, setDayTab] = useState<string | 'all'>('all');
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({
     key: 'arrival',
     dir: 'asc',
@@ -105,6 +125,8 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [focus, setFocus] = useState<MapPoint | null>(null);
+  const [panelOpen, setPanelOpen] = useState(true);
+  const [resizeToken, setResizeToken] = useState(0);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('tgvmax-theme');
     if (saved === 'light' || saved === 'dark') return saved;
@@ -112,6 +134,8 @@ export default function App() {
       ? 'dark'
       : 'light';
   });
+  const geo = useGeolocation();
+  const [geoTarget, setGeoTarget] = useState<GeoTarget>(null);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -131,7 +155,8 @@ export default function App() {
       .then((next) => {
         if (cancelled) return;
         setRange(next);
-        setDate((current) => (current === '' ? next.min : current));
+        setDateFrom((current) => (current === '' ? next.min : current));
+        setDateTo((current) => (current === '' ? next.min : current));
       })
       .catch((err: unknown) => {
         if (cancelled) return;
@@ -150,7 +175,7 @@ export default function App() {
           ? destination
           : null;
 
-    if (!selected || selected.length === 0 || !date) {
+    if (!selected || selected.length === 0 || !dateFrom || !dateTo) {
       setLegs(null);
       return;
     }
@@ -163,8 +188,8 @@ export default function App() {
 
     const request =
       mode === 'origin'
-        ? getDestinations(date, codes)
-        : getOrigins(date, codes);
+        ? getDestinations(dateFrom, dateTo, codes)
+        : getOrigins(dateFrom, dateTo, codes);
 
     request
       .then((next) => {
@@ -183,22 +208,23 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, [mode, origin, destination, date]);
+  }, [mode, origin, destination, dateFrom, dateTo]);
 
   useEffect(() => {
     setEdges(null);
     setFocus(null);
-  }, [mode, from, to, date]);
+  }, [mode, from, to, dateFrom, dateTo]);
 
   const searchItinerary = useCallback(async () => {
-    if (from.length === 0 || to.length === 0 || !date) return;
+    if (from.length === 0 || to.length === 0 || !dateFrom || !dateTo) return;
     setLoading(true);
     setError(null);
     try {
-      let cached = edgesCache.current.get(date);
+      const key = `${dateFrom}..${dateTo}`;
+      let cached = edgesCache.current.get(key);
       if (!cached) {
-        cached = canonicalizeEdges(await getDayEdges(date));
-        edgesCache.current.set(date, cached);
+        cached = canonicalizeEdges(await getRangeEdges(dateFrom, dateTo));
+        edgesCache.current.set(key, cached);
       }
       setEdges(cached);
     } catch (err: unknown) {
@@ -206,23 +232,38 @@ export default function App() {
     } finally {
       setLoading(false);
     }
-  }, [from, to, date]);
+  }, [from, to, dateFrom, dateTo]);
 
   const itineraries = useMemo<Itinerary[] | null>(() => {
     if (!edges || from.length === 0 || to.length === 0) return null;
-    const floor = isToday(date) ? nowMinutes() : -1;
-    const usable = floor < 0 ? edges : edges.filter((e) => e.dep >= floor);
-    const found = findItineraries(
-      usable,
-      from.map((s) => s.code),
-      to.map((s) => s.code),
-      {
-        maxLegs: constraints.maxConnections + 1,
-        minConnection: constraints.minConnection,
-        maxConnection: constraints.maxConnection,
-      },
-    );
-    return found.filter((it) => {
+
+    const byDate = new Map<string, Edge[]>();
+    for (const edge of edges) {
+      const d = edge.date ?? '';
+      const list = byDate.get(d);
+      if (list) list.push(edge);
+      else byDate.set(d, [edge]);
+    }
+
+    const found: Itinerary[] = [];
+    const fromCodes = from.map((s) => s.code);
+    const toCodes = to.map((s) => s.code);
+    const options = {
+      maxLegs: constraints.maxConnections + 1,
+      minConnection: constraints.minConnection,
+      maxConnection: constraints.maxConnection,
+    };
+
+    for (const [d, dayEdges] of byDate) {
+      const floor = isToday(d) ? nowMinutes() : -1;
+      const usable = floor < 0 ? dayEdges : dayEdges.filter((e) => e.dep >= floor);
+      const dayResults = findItineraries(usable, fromCodes, toCodes, options);
+      for (const it of dayResults) {
+        found.push({ ...it, date: d });
+      }
+    }
+
+    const filtered = found.filter((it) => {
       return (
         it.departureTime >= timeFilter.departure.min &&
         it.departureTime <= timeFilter.departure.max &&
@@ -230,7 +271,13 @@ export default function App() {
         it.arrivalTime <= timeFilter.arrival.max
       );
     });
-  }, [edges, from, to, constraints, timeFilter, date]);
+
+    filtered.sort(
+      (a, b) =>
+        (a.date ?? '').localeCompare(b.date ?? '') || a.arrivalTime - b.arrivalTime,
+    );
+    return filtered.slice(0, MAX_ITINERARIES);
+  }, [edges, from, to, constraints, timeFilter]);
 
   const connectionCounts = useMemo<Array<[number, number]>>(() => {
     if (!itineraries) return [];
@@ -242,12 +289,25 @@ export default function App() {
     return [...counts.entries()].sort((a, b) => a[0] - b[0]);
   }, [itineraries]);
 
+  const dayCounts = useMemo<Array<[string, number]>>(() => {
+    if (!itineraries) return [];
+    const counts = new Map<string, number>();
+    for (const it of itineraries) {
+      const d = it.date ?? '';
+      counts.set(d, (counts.get(d) ?? 0) + 1);
+    }
+    return [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  }, [itineraries]);
+
   const visibleItineraries = useMemo<Itinerary[] | null>(() => {
     if (!itineraries) return null;
-    const filtered =
-      connectionTab === 'all'
-        ? itineraries
-        : itineraries.filter((it) => it.legs.length - 1 === connectionTab);
+    let filtered = itineraries;
+    if (connectionTab !== 'all') {
+      filtered = filtered.filter((it) => it.legs.length - 1 === connectionTab);
+    }
+    if (dayTab !== 'all') {
+      filtered = filtered.filter((it) => (it.date ?? '') === dayTab);
+    }
     const dir = sort.dir === 'asc' ? 1 : -1;
     return [...filtered].sort((a, b) => {
       switch (sort.key) {
@@ -266,25 +326,25 @@ export default function App() {
           return 0;
       }
     });
-  }, [itineraries, connectionTab, sort]);
+  }, [itineraries, connectionTab, dayTab, sort]);
 
   const visibleLegs = useMemo<Leg[] | null>(() => {
     if (!legs) return null;
-    const floor = isToday(date) ? nowMinutes() : -1;
     const range =
       timeFilter.kind === 'departure' ? timeFilter.departure : timeFilter.arrival;
     return legs.filter((leg) => {
       const dep = toMinutes(leg.heure_depart);
-      if (dep < floor) return false;
+      if (leg.date && isToday(leg.date) && dep < nowMinutes()) return false;
       const t =
         timeFilter.kind === 'departure' ? dep : toMinutes(leg.heure_arrivee);
       return t >= range.min && t <= range.max;
     });
-  }, [legs, date, timeFilter]);
+  }, [legs, timeFilter]);
 
   useEffect(() => {
     setSelectedItinerary(null);
     setConnectionTab('all');
+    setDayTab('all');
   }, [itineraries]);
 
   const handleModeChange = useCallback((next: Mode) => {
@@ -305,6 +365,30 @@ export default function App() {
       lon: station.lon,
     });
   }, []);
+
+  const togglePanel = useCallback(() => {
+    setPanelOpen((current) => !current);
+    window.setTimeout(() => setResizeToken((t) => t + 1), 300);
+  }, []);
+
+  const handleGeolocate = useCallback(
+    (target: Exclude<GeoTarget, null>) => {
+      setGeoTarget(target);
+      geo.locate();
+    },
+    [geo.locate],
+  );
+
+  useEffect(() => {
+    if (!geo.state.station || !geoTarget) return;
+    const station = geo.state.station;
+    const add = (list: Station[]): Station[] =>
+      list.some((s) => s.code === station.code) ? list : [...list, station];
+    if (geoTarget === 'origin') setOrigin(add);
+    else if (geoTarget === 'from') setFrom(add);
+    setGeoTarget(null);
+    geo.reset();
+  }, [geo.state.station, geoTarget, geo.reset]);
 
   const mapPoints = useMemo<MapPoint[]>(() => {
     if (mode === 'origin' && origin.length > 0) {
@@ -332,6 +416,7 @@ export default function App() {
             lon: station.lon,
             color: AVAILABLE,
             popup: buildPopup(list),
+            count: list.length,
           });
         }
       }
@@ -363,6 +448,7 @@ export default function App() {
             lon: station.lon,
             color: AVAILABLE,
             popup: buildPopup(list),
+            count: list.length,
           });
         }
       }
@@ -485,7 +571,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <aside className="sidebar">
+      <aside className={`sidebar${panelOpen ? ' open' : ''}`}>
         <div className="header-row">
           <h1>
             <span className="brand-dot" />
@@ -497,11 +583,15 @@ export default function App() {
         <ModeTabs mode={mode} onChange={handleModeChange} />
 
         {range ? (
-          <DatePicker
-            value={date}
+          <DateRangePicker
+            from={dateFrom}
+            to={dateTo}
             min={range.min}
             max={range.max}
-            onChange={setDate}
+            onChange={({ from: f, to: t }) => {
+              setDateFrom(f);
+              setDateTo(t);
+            }}
           />
         ) : (
           <div className="hint">Chargement…</div>
@@ -520,6 +610,8 @@ export default function App() {
             value={origin}
             onChange={setOrigin}
             placeholder="Rechercher une gare…"
+            onGeolocate={() => handleGeolocate('origin')}
+            geolocating={geoTarget === 'origin' && geo.state.loading}
           />
         )}
 
@@ -541,6 +633,8 @@ export default function App() {
               value={from}
               onChange={setFrom}
               placeholder="Rechercher une gare…"
+              onGeolocate={() => handleGeolocate('from')}
+              geolocating={geoTarget === 'from' && geo.state.loading}
             />
             <StationMultiSelect
               label="Arrivées"
@@ -569,14 +663,21 @@ export default function App() {
             {error}
           </div>
         )}
+        {geo.state.error && (
+          <div className="hint" style={{ color: '#e3000f' }}>
+            {geo.state.error}
+          </div>
+        )}
 
         {mode === 'origin' && visibleLegs != null && origin.length > 0 && (
-          <LegList
-            legs={visibleLegs}
-            fixedName={origin.map((s) => s.name).join(', ')}
-            mode="origin"
-            onSelect={handleSelect}
-          />
+          <>
+            <LegList
+              legs={visibleLegs}
+              fixedName={origin.map((s) => s.name).join(', ')}
+              mode="origin"
+              onSelect={handleSelect}
+            />
+          </>
         )}
         {mode === 'destination' && visibleLegs != null && destination.length > 0 && (
           <LegList
@@ -609,6 +710,22 @@ export default function App() {
                     </button>
                   ))}
                 </div>
+                {dayCounts.length > 1 && (
+                  <div className="field">
+                    <label>Jour</label>
+                    <select
+                      value={dayTab}
+                      onChange={(e) => setDayTab(e.target.value)}
+                    >
+                      <option value="all">Tous les jours</option>
+                      {dayCounts.map(([d, n]) => (
+                        <option key={d} value={d}>
+                          {formatDate(d)} ({n})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <div className="field">
                   <label>Trier par</label>
                   <select
@@ -639,6 +756,18 @@ export default function App() {
             />
           </>
         )}
+
+        {(mode === 'origin' || mode === 'destination') &&
+          visibleLegs != null &&
+          visibleLegs.length > 0 && (
+            <div className="legend">
+              <span>
+                <span className="swatch" style={{ background: AVAILABLE }} />
+                disponible
+              </span>
+              <span>taille = nombre de départs</span>
+            </div>
+          )}
       </aside>
 
       <div className="map-wrap">
@@ -648,8 +777,18 @@ export default function App() {
           focus={focus}
           fit
           dark={theme === 'dark'}
+          resizeToken={resizeToken}
           onPointClick={handleSelect}
         />
+        <button
+          type="button"
+          className="map-toggle"
+          aria-label={panelOpen ? 'Fermer le panneau' : 'Ouvrir le panneau'}
+          onClick={togglePanel}
+        >
+          {panelOpen ? '✕' : '☰'}
+        </button>
+        {panelOpen && <div className="map-backdrop" onClick={togglePanel} />}
       </div>
     </div>
   );

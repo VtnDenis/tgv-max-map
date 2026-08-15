@@ -135,6 +135,17 @@ body {
   border-color: var(--accent);
 }
 
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.date-range input {
+  flex: 1;
+  min-width: 0;
+}
+
 .tabs {
   display: flex;
   gap: 4px;
@@ -338,6 +349,21 @@ button.primary:disabled {
   cursor: not-allowed;
 }
 
+.geo-btn {
+  width: 38px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.geo-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .chips {
   display: flex;
   flex-wrap: wrap;
@@ -383,14 +409,59 @@ button.primary:disabled {
   vertical-align: middle;
 }
 
+.map-toggle {
+  display: none;
+}
+
+.map-backdrop {
+  display: none;
+}
+
 @media (max-width: 720px) {
   .app {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
   }
   .sidebar {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 85%;
+    max-width: 360px;
+    z-index: 1200;
+    border-right: 1px solid var(--border);
+    border-bottom: none;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    box-shadow: var(--shadow);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  .map-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    z-index: 1300;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+  }
+  .map-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    background: rgba(0, 0, 0, 0.35);
   }
 }
 

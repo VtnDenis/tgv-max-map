@@ -8,6 +8,8 @@ export interface StationMultiSelectProps {
   value: Station[];
   onChange: (value: Station[]) => void;
   placeholder?: string;
+  onGeolocate?: () => void;
+  geolocating?: boolean;
 }
 
 interface Match {
@@ -36,21 +38,20 @@ function filterStations(
   let bestPrefix: Station | null = null;
 
   for (const station of stations) {
-    if (excluded.has(station.code)) continue;
     const name = normalize(station.name);
     const code = normalize(station.code);
     let rank = -1;
     if (name.startsWith(needle)) rank = 0;
     else if (name.includes(needle)) rank = 1;
     else if (code.includes(needle)) rank = 2;
-    if (rank >= 0) {
-      ranked.push({ station, rank });
-      if (rank === 0 && !bestPrefix) bestPrefix = station;
-    }
+    if (rank === 0 && !bestPrefix) bestPrefix = station;
+    if (rank < 0 || excluded.has(station.code)) continue;
+    ranked.push({ station, rank });
   }
 
   if (bestPrefix) {
     const matchedCodes = new Set(ranked.map((m) => m.station.code));
+    matchedCodes.add(bestPrefix.code);
     const nearby: Match[] = [];
     for (const station of stations) {
       if (excluded.has(station.code) || matchedCodes.has(station.code)) continue;
@@ -78,6 +79,8 @@ export default function StationMultiSelect({
   value,
   onChange,
   placeholder,
+  onGeolocate,
+  geolocating = false,
 }: StationMultiSelectProps): JSX.Element {
   const id = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -157,6 +160,18 @@ export default function StationMultiSelect({
             onKeyDown={handleKeyDown}
             onBlur={() => window.setTimeout(() => setOpen(false), 150)}
           />
+          {onGeolocate && (
+            <button
+              type="button"
+              className="geo-btn"
+              aria-label="Utiliser ma position"
+              title="Utiliser ma position"
+              disabled={geolocating}
+              onClick={onGeolocate}
+            >
+              {geolocating ? '…' : '📍'}
+            </button>
+          )}
           <button
             type="button"
             className="add-btn"
