@@ -2,7 +2,7 @@ import 'leaflet/dist/leaflet.css';
 import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
 import { Circle, CircleMarker, MapContainer, Polyline, Popup, TileLayer, useMap } from 'react-leaflet';
 import * as L from 'leaflet';
-import type { MapPoint, RadiusCircle } from '../types';
+import type { HaloCircle, MapPoint, RadiusCircle } from '../types';
 import StationPopup from './StationPopup';
 
 export interface MapLine {
@@ -22,6 +22,7 @@ interface StationMapProps {
   dark?: boolean;
   resizeToken?: number;
   radiusCircle?: RadiusCircle | null;
+  halos?: HaloCircle[];
 }
 
 interface FitBoundsProps {
@@ -146,6 +147,7 @@ export default function StationMap({
   dark = false,
   resizeToken,
   radiusCircle = null,
+  halos = [],
 }: StationMapProps) {
   const markersRef = useRef<Map<string, L.CircleMarker>>(new Map());
 
@@ -194,6 +196,20 @@ export default function StationMap({
           }}
         />
       )}
+      {halos.map((halo, i) => (
+        <Circle
+          key={i}
+          center={[halo.lat, halo.lon] as [number, number]}
+          radius={halo.radiusKm * 1000}
+          pathOptions={{
+            color: halo.color,
+            fillColor: halo.color,
+            fillOpacity: 0.05,
+            weight: 1,
+            dashArray: '6 6',
+          }}
+        />
+      ))}
       {lines.map((line, i) => (
         <Polyline
           key={i}

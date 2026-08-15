@@ -4,17 +4,23 @@ import {
   postcardBlob,
   postcardFileName,
   renderPostcardDataUrl,
+  renderWeekendPostcardDataUrl,
+  weekendPostcardBlob,
+  weekendPostcardFileName,
   type PostcardTheme,
+  type WeekendPostcard,
 } from '../lib/postcard';
 
 export interface PostcardModalProps {
-  itinerary: Itinerary | null;
+  itinerary?: Itinerary | null;
+  weekend?: WeekendPostcard | null;
   theme: PostcardTheme;
   onClose: () => void;
 }
 
 export default function PostcardModal({
   itinerary,
+  weekend,
   theme,
   onClose,
 }: PostcardModalProps): JSX.Element | null {
@@ -25,12 +31,13 @@ export default function PostcardModal({
   const closeRef = useRef<HTMLButtonElement>(null);
 
   const dataUrl = useMemo(() => {
-    if (!itinerary) return null;
-    return renderPostcardDataUrl({ itinerary, theme });
-  }, [itinerary, theme]);
+    if (weekend) return renderWeekendPostcardDataUrl({ weekend, theme });
+    if (itinerary) return renderPostcardDataUrl({ itinerary, theme });
+    return null;
+  }, [weekend, itinerary, theme]);
 
   useEffect(() => {
-    if (!itinerary) return;
+    if (!dataUrl) return;
     const previous = document.activeElement as HTMLElement | null;
     closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
@@ -58,11 +65,15 @@ export default function PostcardModal({
       window.removeEventListener('keydown', onKey);
       previous?.focus();
     };
-  }, [itinerary, onClose]);
+  }, [dataUrl, onClose]);
 
-  if (!itinerary || !dataUrl) return null;
+  if (!dataUrl) return null;
 
-  const fileName = postcardFileName(itinerary);
+  const fileName = weekend
+    ? weekendPostcardFileName(weekend)
+    : itinerary
+      ? postcardFileName(itinerary)
+      : 'tgv-max.png';
 
   const handleDownload = () => {
     const a = document.createElement('a');
@@ -74,7 +85,6 @@ export default function PostcardModal({
   };
 
   const handleShare = async () => {
-    if (!itinerary) return;
     if (typeof navigator.share !== 'function') {
       handleDownload();
       return;
@@ -83,7 +93,11 @@ export default function PostcardModal({
     setSharing(true);
     setError(null);
     try {
-      const blob = await postcardBlob({ itinerary, theme });
+      const blob = weekend
+        ? await weekendPostcardBlob({ weekend, theme })
+        : itinerary
+          ? await postcardBlob({ itinerary, theme })
+          : null;
       if (!blob) {
         handleDownload();
         return;
@@ -92,7 +106,7 @@ export default function PostcardModal({
       const data: ShareData = {
         files: [file],
         title: 'TGV MAX — Carte postale',
-        text: 'Mon trajet TGV MAX',
+        text: weekend ? 'Mon week-end TGV MAX' : 'Mon trajet TGV MAX',
       };
       if (typeof navigator.canShare === 'function' && !navigator.canShare(data)) {
         handleDownload();

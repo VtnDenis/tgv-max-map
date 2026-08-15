@@ -1,23 +1,31 @@
 import type { Leg } from '../types';
+import { formatDuration } from '../lib/itinerary';
 
 export interface RayonDestination {
   code: string;
   name: string;
   distanceKm: number;
+  durationMin?: number;
+  color?: string;
   legs: Leg[];
 }
 
 interface RayonListProps {
   destinations: RayonDestination[];
+  mode?: 'distance' | 'time';
   onSelect?: (code: string) => void;
 }
 
-/** Sorted list of destinations within the radius, with distance and direct departures. */
-export default function RayonList({ destinations, onSelect }: RayonListProps): JSX.Element {
+/** Sorted list of destinations within the radius/halo, with distance/time and direct departures. */
+export default function RayonList({
+  destinations,
+  mode = 'distance',
+  onSelect,
+}: RayonListProps): JSX.Element {
   if (destinations.length === 0) {
     return (
       <div className="hint">
-        Aucune destination dans ce rayon. Augmentez le rayon (curseur ci-dessus).
+        Aucune destination. Augmentez le rayon (curseur ci-dessus).
       </div>
     );
   }
@@ -25,8 +33,8 @@ export default function RayonList({ destinations, onSelect }: RayonListProps): J
   return (
     <div className="results">
       <div className="hint">
-        {destinations.length} destination{destinations.length > 1 ? 's' : ''} dans le
-        rayon
+        {destinations.length} destination{destinations.length > 1 ? 's' : ''}{' '}
+        {mode === 'time' ? 'dans la limite de temps' : 'dans le rayon'}
       </div>
       {destinations.map((dest) => (
         <div
@@ -34,6 +42,9 @@ export default function RayonList({ destinations, onSelect }: RayonListProps): J
           key={dest.code}
           role="button"
           tabIndex={0}
+          style={
+            dest.color ? { borderLeftColor: dest.color } : undefined
+          }
           onClick={() => onSelect?.(dest.code)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -44,7 +55,11 @@ export default function RayonList({ destinations, onSelect }: RayonListProps): J
         >
           <div className="row">
             <div className="station">{dest.name}</div>
-            <span className="muted">{Math.round(dest.distanceKm)} km</span>
+            <span className="muted">
+              {dest.durationMin !== undefined
+                ? formatDuration(dest.durationMin)
+                : `${Math.round(dest.distanceKm)} km`}
+            </span>
           </div>
           {dest.legs.map((leg, i) => (
             <div className="row" key={i}>

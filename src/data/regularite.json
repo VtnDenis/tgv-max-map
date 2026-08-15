@@ -1,0 +1,22 @@
+{
+  "Atlantique": {
+    "regularite": 82.5,
+    "ponctualite": 77.1
+  },
+  "Est": {
+    "regularite": 75.3,
+    "ponctualite": 68.4
+  },
+  "Europe": {
+    "regularite": 68.1,
+    "ponctualite": 47.7
+  },
+  "Nord": {
+    "regularite": 75.8,
+    "ponctualite": 72.6
+  },
+  "Sud-Est": {
+    "regularite": 77.7,
+    "ponctualite": 77.3
+  }
+}

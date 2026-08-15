@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import type { MapPoint } from '../types';
 import { getCityImages, type CityImage } from '../api/cityImages';
+import { getAttendance } from '../lib/frequentation';
+import { formatAttendance } from '../lib/format';
 
 interface StationPopupProps {
   point: MapPoint;
@@ -10,6 +12,7 @@ interface StationPopupProps {
 /** Popup content: station name, departure count, leg list and city photos. */
 export default function StationPopup({ point, opened }: StationPopupProps) {
   const [images, setImages] = useState<CityImage[]>([]);
+  const attendance = getAttendance(point.code);
 
   useEffect(() => {
     if (!opened || images.length > 0) return;
@@ -30,6 +33,11 @@ export default function StationPopup({ point, opened }: StationPopupProps) {
           <span> · {point.count} départs</span>
         ) : null}
       </div>
+      {attendance !== null ? (
+        <div className="station-popup-attendance">
+          {formatAttendance(attendance)} voyageurs/an
+        </div>
+      ) : null}
       {point.popup ? (
         <div className="station-popup-legs" dangerouslySetInnerHTML={{ __html: point.popup }} />
       ) : null}

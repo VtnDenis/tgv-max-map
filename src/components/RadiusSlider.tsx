@@ -5,6 +5,8 @@ export interface RadiusSliderProps {
   step: number;
   value: number;
   onChange: (value: number) => void;
+  unit?: string;
+  valueLabel?: string;
 }
 
 /** Single-value native range input for the radius map mode. */
@@ -15,11 +17,14 @@ export default function RadiusSlider({
   step,
   value,
   onChange,
+  unit = 'km',
+  valueLabel,
 }: RadiusSliderProps): JSX.Element {
   return (
     <div className="field">
       <label>
-        {label} : <span className="muted">{value} km</span>
+        {label} :{' '}
+        <span className="muted">{valueLabel ?? `${value} ${unit}`}</span>
       </label>
       <input
         type="range"

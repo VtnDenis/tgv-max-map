@@ -1,7 +1,10 @@
 import stationsData from '../data/stations.json';
 import type { Station } from '../types';
 
-type StationsJson = Record<string, { name: string; lat: number; lon: number }>;
+type StationsJson = Record<
+  string,
+  { name: string; lat: number; lon: number; uic?: string; uics?: string[] }
+>;
 
 function normalize(value: string): string {
   return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
@@ -25,13 +28,21 @@ export function haversineKm(
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
-const RAW: Array<{ code: string; name: string; lat: number; lon: number }> =
-  Object.entries(stationsData as StationsJson).map(([code, data]) => ({
-    code,
-    name: data.name,
-    lat: data.lat,
-    lon: data.lon,
-  }));
+const RAW: Array<{
+  code: string;
+  name: string;
+  lat: number;
+  lon: number;
+  uic?: string;
+  uics?: string[];
+}> = Object.entries(stationsData as StationsJson).map(([code, data]) => ({
+  code,
+  name: data.name,
+  lat: data.lat,
+  lon: data.lon,
+  uic: data.uic,
+  uics: data.uics,
+}));
 
 const byName = new Map<string, Station>();
 for (const raw of RAW) {
@@ -39,6 +50,11 @@ for (const raw of RAW) {
   const existing = byName.get(key);
   if (existing) {
     existing.codes.push(raw.code);
+    if (raw.uics) {
+      const set = new Set([...(existing.uics ?? []), ...raw.uics]);
+      existing.uics = [...set];
+    }
+    if (!existing.uic && raw.uic) existing.uic = raw.uic;
   } else {
     byName.set(key, {
       code: raw.code,
@@ -46,6 +62,8 @@ for (const raw of RAW) {
       name: raw.name,
       lat: raw.lat,
       lon: raw.lon,
+      uic: raw.uic,
+      uics: raw.uics,
     });
   }
 }
@@ -69,6 +87,15 @@ export function getAllStations(): Station[] {
 /** Look up a station group by any of its IATA-ish codes. */
 export function getStation(code: string): Station | undefined {
   return STATION_BY_CODE.get(code);
+}
+
+/** UIC codes for a station code (list for aggregates, single for simple stations). */
+export function getStationUics(code: string): string[] {
+  const station = getStation(code);
+  if (!station) return [];
+  if (station.uics) return station.uics;
+  if (station.uic) return [station.uic];
+  return [];
 }
 
 /** Map any IATA-ish code to the canonical code of its group. */

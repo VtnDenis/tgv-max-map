@@ -18,3 +18,13 @@ export function formatDayLabel(iso: string): string {
   const date = new Date(Date.UTC(y, m - 1, d));
   return `${WEEKDAYS[date.getUTCDay()]} ${d}`;
 }
+
+export function formatFare(fare: { min: number; max: number }): string {
+  return fare.min !== fare.max ? `${fare.min}–${fare.max} €` : `${fare.min} €`;
+}
+
+export function formatAttendance(n: number): string {
+  if (n >= 1e6) return `${(n / 1e6).toFixed(1)} M`;
+  if (n >= 1000) return `${Math.round(n / 1000)} k`;
+  return `${Math.round(n)}`;
+}

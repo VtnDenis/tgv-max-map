@@ -19,6 +19,19 @@ const TGVMAX_API =
 const GARES_CSV =
   'https://data.sncf.com/api/explore/v2.1/catalog/datasets/liste-des-gares/exports/csv?select=libelle,x_wgs84,y_wgs84,code_uic&where=voyageurs%3D%22O%22';
 
+// "(intramuros)" city labels aggregate several Parisian/Lyonnais main stations
+// under one TGV MAX code; store their UIC codes as a list for joining.
+const INTRAMUROS_UIC = {
+  'PARIS (intramuros)': [
+    '87547000',
+    '87113001',
+    '87686006',
+    '87391003',
+    '87271007',
+  ],
+  'LYON (intramuros)': ['87723197', '87722025'],
+};
+
 // ---------------------------------------------------------------------------
 // Manual fallback: code -> [lat, lon].
 // Only used when a station cannot be uniquely name-matched against the gares
@@ -273,6 +286,7 @@ function dedupeGares(gares) {
       libelle: group[0].libelle,
       lat: group.reduce((sum, g) => sum + g.lat, 0) / group.length,
       lon: group.reduce((sum, g) => sum + g.lon, 0) / group.length,
+      codeUic: group[0].codeUic,
     });
   }
   return out;
@@ -350,7 +364,12 @@ async function main() {
     }
 
     if (resolved) {
-      stations[code] = { name: displayName, lat: resolved.lat, lon: resolved.lon };
+      stations[code] = {
+        name: displayName,
+        lat: resolved.lat,
+        lon: resolved.lon,
+        uic: resolved.codeUic,
+      };
       viaGares += 1;
     } else if (MANUAL[code]) {
       stations[code] = {
@@ -360,6 +379,15 @@ async function main() {
       };
       viaManual += 1;
       manualCodes.push(code);
+    }
+  }
+
+  // Post-pass: "(intramuros)" city entries aggregate several physical stations;
+  // attach the UIC list and drop the single-code fallback for those.
+  for (const entry of Object.values(stations)) {
+    if (INTRAMUROS_UIC[entry.name]) {
+      entry.uics = INTRAMUROS_UIC[entry.name];
+      delete entry.uic;
     }
   }
 

@@ -26,6 +26,10 @@ export interface Station {
   name: string;
   lat: number;
   lon: number;
+  /** SNCF UIC code, present for stations matched via the gares list. */
+  uic?: string;
+  /** Multiple UIC codes, present for "(intramuros)" city aggregates. */
+  uics?: string[];
 }
 
 /** A scheduled journey leg (origin -> destination) with times. */
@@ -106,6 +110,23 @@ export interface RadiusCircle {
   lat: number;
   lon: number;
   radiusKm: number;
+}
+
+/** A decorative concentric isochrone ring (time-halo map mode). */
+export interface HaloCircle {
+  lat: number;
+  lon: number;
+  radiusKm: number;
+  color: string;
+}
+
+/** A generated weekend trip: direct outbound (Friday) + direct inbound (Sunday). */
+export interface WeekendProgram {
+  friday: string;
+  sunday: string;
+  destination: Station;
+  outbound: Edge;
+  inbound: Edge;
 }
 
 /** Identifier of a predefined challenge in the treasure-hunt mode. */

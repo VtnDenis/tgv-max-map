@@ -8,7 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
-    "build:stations": "node scripts/build-stations.mjs"
+    "build:stations": "node scripts/build-stations.mjs",
+    "build:data": "node scripts/build-stations.mjs && node scripts/build-fares.mjs && node scripts/build-frequentation.mjs && node scripts/build-regularite.mjs"
   },
   "dependencies": {
     "leaflet": "^1.9.4",

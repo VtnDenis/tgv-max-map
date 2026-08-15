@@ -1023,3 +1023,100 @@ button.roulette:disabled {
 [data-theme='dark'] .leaflet-control-attribution a {
   color: var(--muted);
 }
+
+.weekend-program {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--warn);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+
+.weekend-title {
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.weekend-title:hover {
+  color: var(--accent);
+}
+
+.weekend-leg {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+.weekend-leg-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.weekend-leg .station {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.weekend-leg .time {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+}
+
+.weekend-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.weekend-actions button {
+  flex: 1;
+}
+
+.fare {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.station-popup-attendance {
+  color: var(--muted);
+  font-size: 0.85em;
+  margin-top: 2px;
+}
+
+.punctuality-row {
+  margin-bottom: 8px;
+}
+
+.punctuality-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85em;
+}
+
+.punctuality-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  margin-top: 3px;
+  overflow: hidden;
+}
+
+.punctuality-bar {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.punctuality-ponctualite {
+  color: var(--muted);
+  font-size: 0.8em;
+}

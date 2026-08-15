@@ -350,3 +350,163 @@ export function postcardFileName(it: Itinerary): string {
   const date = (it.date ?? first.date ?? '').replace(/-/g, '');
   return `tgv-max-${[slug(orig), slug(dest), date].filter(Boolean).join('-')}.png`;
 }
+
+export interface WeekendPostcard {
+  destination: string;
+  friday: string;
+  sunday: string;
+  outbound: Itinerary;
+  inbound: Itinerary;
+}
+
+interface WeekendLeg {
+  from: string;
+  fromName: string;
+  to: string;
+  toName: string;
+  dep: number;
+  arr: number;
+  trainNo: string;
+}
+
+function drawWeekendLeg(
+  ctx: CanvasRenderingContext2D,
+  p: Palette,
+  label: string,
+  leg: WeekendLeg,
+  top: number,
+): number {
+  ctx.textAlign = 'left';
+  ctx.font = `700 24px ${FONT}`;
+  ctx.fillStyle = p.accent;
+  ctx.fillText(label.toUpperCase(), LEFT, top);
+
+  const route = `${resolveName(leg.from, leg.fromName)} → ${resolveName(leg.to, leg.toName)}`;
+  ctx.font = `600 38px ${FONT}`;
+  ctx.fillStyle = p.text;
+  ctx.fillText(truncate(ctx, route, RIGHT - LEFT), LEFT, top + 44);
+
+  ctx.font = `400 28px ${FONT}`;
+  ctx.fillStyle = p.text;
+  ctx.fillText(`${formatTime(leg.dep)} → ${formatTime(leg.arr)}`, LEFT, top + 92);
+
+  ctx.textAlign = 'right';
+  ctx.font = `400 26px ${FONT}`;
+  ctx.fillStyle = p.muted;
+  ctx.fillText(
+    `train ${leg.trainNo} · ${formatDuration(leg.arr - leg.dep)}`,
+    RIGHT,
+    top + 92,
+  );
+
+  return top + 92 + 20;
+}
+
+export function drawWeekendPostcard(
+  ctx: CanvasRenderingContext2D,
+  options: { weekend: WeekendPostcard; theme: PostcardTheme },
+): void {
+  const { weekend, theme } = options;
+  const out = weekend.outbound.legs[0];
+  const inb = weekend.inbound.legs[0];
+  if (!out || !inb) return;
+
+  const p = PALETTES[theme];
+
+  ctx.save();
+  ctx.textBaseline = 'middle';
+
+  ctx.fillStyle = p.bg;
+  ctx.fillRect(0, 0, W, H);
+
+  roundedRect(ctx, CARD_X, CARD_Y, CARD_W, CARD_H, 28);
+  ctx.fillStyle = p.panel;
+  ctx.fill();
+
+  ctx.fillStyle = p.accent;
+  roundedRect(ctx, CARD_X, CARD_Y, CARD_W, 8, 8);
+  ctx.fill();
+
+  const headerY = CARD_Y + PAD + 24;
+  ctx.beginPath();
+  ctx.arc(LEFT + 16, headerY, 16, 0, Math.PI * 2);
+  ctx.fillStyle = FIXED;
+  ctx.fill();
+
+  ctx.font = `700 52px ${FONT}`;
+  ctx.fillStyle = p.text;
+  ctx.textAlign = 'left';
+  ctx.fillText('TGV MAX', LEFT + 48, headerY);
+
+  ctx.font = `400 25px ${FONT}`;
+  ctx.fillStyle = p.muted;
+  ctx.fillText('Carte postale week-end', LEFT + 48, headerY + 48);
+
+  ctx.strokeStyle = p.border;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(LEFT, CARD_Y + PAD + 108);
+  ctx.lineTo(RIGHT, CARD_Y + PAD + 108);
+  ctx.stroke();
+
+  ctx.textAlign = 'center';
+  ctx.font = `700 64px ${FONT}`;
+  ctx.fillStyle = p.text;
+  ctx.fillText(truncate(ctx, weekend.destination, RIGHT - LEFT), CENTER_X, 260);
+
+  ctx.font = `400 28px ${FONT}`;
+  ctx.fillStyle = p.muted;
+  ctx.fillText(
+    `${formatDate(weekend.friday)} → ${formatDate(weekend.sunday)}`,
+    CENTER_X,
+    322,
+  );
+
+  let y = 410;
+  y = drawWeekendLeg(ctx, p, 'Aller', out, y);
+  y += 40;
+  y = drawWeekendLeg(ctx, p, 'Retour', inb, y);
+
+  ctx.textAlign = 'center';
+  ctx.font = `400 22px ${FONT}`;
+  ctx.fillStyle = p.muted;
+  ctx.fillText('Généré avec TGV MAX Map', CENTER_X, H - 60);
+
+  ctx.restore();
+}
+
+function drawWeekendToCanvas(options: {
+  weekend: WeekendPostcard;
+  theme: PostcardTheme;
+}): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = W * SCALE;
+  canvas.height = H * SCALE;
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    ctx.scale(SCALE, SCALE);
+    drawWeekendPostcard(ctx, options);
+  }
+  return canvas;
+}
+
+export function renderWeekendPostcardDataUrl(options: {
+  weekend: WeekendPostcard;
+  theme: PostcardTheme;
+}): string {
+  return drawWeekendToCanvas(options).toDataURL('image/png');
+}
+
+export function weekendPostcardBlob(options: {
+  weekend: WeekendPostcard;
+  theme: PostcardTheme;
+}): Promise<Blob | null> {
+  return new Promise((resolve) => {
+    drawWeekendToCanvas(options).toBlob((blob) => resolve(blob), 'image/png');
+  });
+}
+
+export function weekendPostcardFileName(weekend: WeekendPostcard): string {
+  const date = weekend.friday.replace(/-/g, '');
+  return `tgv-max-weekend-${[slug(weekend.destination), date].filter(Boolean).join('-')}.png`;
+}

@@ -5,12 +5,14 @@ import type {
   DateRange,
   DayAggregate,
   Edge,
+  HaloCircle,
   Itinerary,
   Leg,
   MapPoint,
   Mode,
   RadiusCircle,
   Station,
+  WeekendProgram,
 } from './types';
 import {
   getDateRange,
@@ -32,12 +34,16 @@ import {
   toMinutes,
 } from './lib/itinerary';
 import { computeChallenges, computeLongestItinerary } from './lib/challenges';
-import { formatDate, formatDayLabel, formatTime } from './lib/format';
+import { formatDate, formatDayLabel, formatFare, formatTime } from './lib/format';
+import { getFareRange } from './lib/fares';
+import { findNextWeekend, WEEKEND_EVENING_MIN } from './lib/weekend';
+import type { WeekendPostcard } from './lib/postcard';
 import StationMap, { type MapLine } from './components/StationMap';
 import { ItineraryList, LegList } from './components/ResultsList';
 import RayonList, { type RayonDestination } from './components/RayonList';
 import ChallengeList from './components/ChallengeList';
 import RadiusSlider from './components/RadiusSlider';
+import WeekendProgramView from './components/WeekendProgram';
 import DateRangePicker from './components/DateRangePicker';
 import StationMultiSelect from './components/StationMultiSelect';
 import ModeTabs from './components/ModeTabs';
@@ -51,6 +57,7 @@ import ItineraryControls, {
 import TimeFilter, { type TimeFilterValue } from './components/TimeFilter';
 import ThemeToggle from './components/ThemeToggle';
 import PostcardModal from './components/PostcardModal';
+import PunctualityPanel from './components/PunctualityPanel';
 import { useGeolocation } from './hooks/useGeolocation';
 import { useConfetti } from './hooks/useConfetti';
 import { useSameDayCelebration } from './hooks/useSameDayCelebration';
@@ -61,6 +68,26 @@ const AVAILABLE = '#1f77b4';
 const INTERMEDIATE = '#9467bd';
 const HIGHLIGHT = '#f9ab00';
 const CHALLENGE_GOLD = '#f2b705';
+
+const ISOCHRONE_ONE = '#0f9d58';
+const ISOCHRONE_TWO = '#f9ab00';
+const ISOCHRONE_THREE = '#e3000f';
+const ISOCHRONE_BEYOND = '#9aa4b2';
+
+function isochroneColor(durationMin: number): string {
+  if (durationMin <= 60) return ISOCHRONE_ONE;
+  if (durationMin <= 120) return ISOCHRONE_TWO;
+  if (durationMin <= 180) return ISOCHRONE_THREE;
+  return ISOCHRONE_BEYOND;
+}
+
+/** Vitesse nominale pour convertir des seuils temporels en rayons (anneaux décoratifs). */
+const HALO_SPEED_KMH = 250;
+const HALO_RINGS: Array<{ minutes: number; color: string }> = [
+  { minutes: 60, color: ISOCHRONE_ONE },
+  { minutes: 120, color: ISOCHRONE_TWO },
+  { minutes: 180, color: ISOCHRONE_THREE },
+];
 
 /** Ramp séquentielle "Blues", ordonnée en luminance, pour l'intensité d'une carte de chauffe. */
 function heatColor(t: number): string {
@@ -85,6 +112,11 @@ const RAYON_MIN = 25;
 const RAYON_MAX = 500;
 const RAYON_STEP = 25;
 const RAYON_DEFAULT = 200;
+
+const RAYON_TIME_MIN = 30;
+const RAYON_TIME_MAX = 300;
+const RAYON_TIME_STEP = 30;
+const RAYON_TIME_DEFAULT = 180;
 
 const SIDEBAR_DEFAULT = 340;
 const SIDEBAR_MIN = 280;
@@ -171,7 +203,9 @@ function buildPopup(list: Leg[]): string {
         toMinutes(leg.heure_arrivee) - toMinutes(leg.heure_depart),
       );
       const day = leg.date ? `${formatDate(leg.date)} ` : '';
-      return `${day}${leg.heure_depart} → ${leg.heure_arrivee} (${dur})${train}`;
+      const fare = getFareRange(leg.origine_iata, leg.destination_iata);
+      const fareLabel = fare ? ` · ≈ ${formatFare(fare)}` : '';
+      return `${day}${leg.heure_depart} → ${leg.heure_arrivee} (${dur})${train}${fareLabel}`;
     })
     .join('<br/>');
 }
@@ -216,6 +250,8 @@ export default function App() {
   const [to, setTo] = useState<Station[]>([]);
   const [rayonOrigin, setRayonOrigin] = useState<Station[]>([]);
   const [rayonRadius, setRayonRadius] = useState(RAYON_DEFAULT);
+  const [rayonKind, setRayonKind] = useState<'distance' | 'time'>('distance');
+  const [rayonTimeMax, setRayonTimeMax] = useState(RAYON_TIME_DEFAULT);
   const [rayonLegs, setRayonLegs] = useState<Leg[] | null>(null);
   const [legs, setLegs] = useState<Leg[] | null>(null);
   const [edges, setEdges] = useState<Edge[] | null>(null);
@@ -261,7 +297,13 @@ export default function App() {
   const [focus, setFocus] = useState<MapPoint | null>(null);
   const [roulettePick, setRoulettePick] = useState<string | null>(null);
   const [rouletteLegs, setRouletteLegs] = useState<Leg[] | null>(null);
+  const [weekendProgram, setWeekendProgram] = useState<WeekendProgram | null>(null);
+  const [weekendPick, setWeekendPick] = useState<string | null>(null);
+  const [weekendLoading, setWeekendLoading] = useState(false);
+  const [weekendError, setWeekendError] = useState<string | null>(null);
+  const weekendCache = useRef<Map<string, Edge[]>>(new Map());
   const [postcardOpen, setPostcardOpen] = useState(false);
+  const [weekendPostcard, setWeekendPostcard] = useState<WeekendPostcard | null>(null);
   const [panelOpen, setPanelOpen] = useState(() => window.innerWidth > 720);
   const [resizeToken, setResizeToken] = useState(0);
   const [sidebarWidth, setSidebarWidth] = useState(getInitialSidebarWidth);
@@ -672,6 +714,44 @@ export default function App() {
     return result;
   }, [rayonLegs, rayonOrigin, rayonRadius]);
 
+  const visibleRayonTimes = useMemo<RayonDestination[]>(() => {
+    if (!rayonLegs || rayonOrigin.length === 0 || rayonKind !== 'time') return [];
+    const origin = rayonOrigin[0];
+    const byDestination = new Map<string, Leg[]>();
+    for (const leg of rayonLegs) {
+      if (leg.date && isToday(leg.date) && toMinutes(leg.heure_depart) < nowMinutes()) {
+        continue;
+      }
+      const list = byDestination.get(leg.destination_iata);
+      if (list) list.push(leg);
+      else byDestination.set(leg.destination_iata, [leg]);
+    }
+    const result: RayonDestination[] = [];
+    for (const [code, list] of byDestination) {
+      const station = getStation(code);
+      if (!station) continue;
+      let minDuration = Number.POSITIVE_INFINITY;
+      for (const leg of list) {
+        const d = toMinutes(leg.heure_arrivee) - toMinutes(leg.heure_depart);
+        if (d < minDuration) minDuration = d;
+      }
+      if (minDuration > rayonTimeMax) continue;
+      result.push({
+        code: station.code,
+        name: station.name,
+        distanceKm: haversineKm(origin.lat, origin.lon, station.lat, station.lon),
+        durationMin: minDuration,
+        color: isochroneColor(minDuration),
+        legs: list,
+      });
+    }
+    result.sort((a, b) => (a.durationMin ?? 0) - (b.durationMin ?? 0));
+    return result;
+  }, [rayonLegs, rayonOrigin, rayonKind, rayonTimeMax]);
+
+  const activeRayonDestinations =
+    rayonKind === 'time' ? visibleRayonTimes : visibleRayonDestinations;
+
   const challengeResults = useMemo<ChallengeResult[]>(() => {
     const originStation = origin[0] ?? null;
     const direct = computeChallenges(legs, originStation);
@@ -803,6 +883,12 @@ export default function App() {
     return [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
   }, [legs]);
 
+  useEffect(() => {
+    setWeekendProgram(null);
+    setWeekendPick(null);
+    setWeekendError(null);
+  }, [origin, range]);
+
   const handleModeChange = useCallback((next: Mode) => {
     setMode(next);
     setLegs(null);
@@ -812,6 +898,9 @@ export default function App() {
     setFocus(null);
     setRoulettePick(null);
     setRouletteLegs(null);
+    setWeekendProgram(null);
+    setWeekendPick(null);
+    setWeekendError(null);
     setError(null);
     setTripKind('single');
     setSearchKind('normal');
@@ -885,6 +974,114 @@ export default function App() {
       lon: station.lon,
     });
   }, [visibleLegs]);
+
+  const runWeekendSurprise = useCallback(async () => {
+    if (origin.length === 0 || !range) return;
+    const weekend = findNextWeekend(range);
+    if (!weekend) {
+      setWeekendProgram(null);
+      setWeekendError('Aucun week-end complet dans la fenêtre de données.');
+      return;
+    }
+
+    setWeekendLoading(true);
+    setWeekendError(null);
+    setWeekendProgram(null);
+    try {
+      const key = `weekend:${weekend.friday}..${weekend.sunday}`;
+      let edges = weekendCache.current.get(key);
+      if (!edges) {
+        edges = canonicalizeEdges(
+          await getRangeEdges(weekend.friday, weekend.sunday),
+        );
+        weekendCache.current.set(key, edges);
+      }
+
+      const originCodes = new Set(origin.flatMap((s) => s.codes));
+      const outbounds = new Map<string, Edge[]>();
+      for (const edge of edges) {
+        if (edge.date !== weekend.friday) continue;
+        if (edge.dep < WEEKEND_EVENING_MIN) continue;
+        if (originCodes.has(edge.from)) {
+          const list = outbounds.get(edge.to);
+          if (list) list.push(edge);
+          else outbounds.set(edge.to, [edge]);
+        }
+      }
+
+      const candidates: Array<{
+        destination: Station;
+        outbound: Edge;
+        inbound: Edge;
+      }> = [];
+      for (const [destCode, obEdges] of outbounds) {
+        if (originCodes.has(destCode)) continue;
+        const destination = getStation(destCode);
+        if (!destination) continue;
+        let inbound: Edge | null = null;
+        for (const edge of edges) {
+          if (edge.date !== weekend.sunday) continue;
+          if (edge.dep < WEEKEND_EVENING_MIN) continue;
+          if (edge.from === destCode && originCodes.has(edge.to)) {
+            if (!inbound || edge.dep < inbound.dep) inbound = edge;
+          }
+        }
+        if (!inbound) continue;
+        const outbound = obEdges.reduce((best, e) => (e.dep < best.dep ? e : best));
+        candidates.push({ destination, outbound, inbound });
+      }
+
+      if (candidates.length === 0) {
+        setWeekendError(
+          'Aucune destination avec aller + retour directs ce week-end.',
+        );
+        return;
+      }
+
+      const pick = candidates[Math.floor(Math.random() * candidates.length)];
+      setWeekendProgram({
+        friday: weekend.friday,
+        sunday: weekend.sunday,
+        destination: pick.destination,
+        outbound: pick.outbound,
+        inbound: pick.inbound,
+      });
+      setWeekendPick(pick.destination.code);
+      setFocus({
+        code: pick.destination.code,
+        name: pick.destination.name,
+        lat: pick.destination.lat,
+        lon: pick.destination.lon,
+      });
+    } catch (err: unknown) {
+      setWeekendError(toErrorMessage(err));
+    } finally {
+      setWeekendLoading(false);
+    }
+  }, [origin, range]);
+
+  const openWeekendPostcard = useCallback(() => {
+    if (!weekendProgram) return;
+    const weekend: WeekendPostcard = {
+      destination: weekendProgram.destination.name,
+      friday: weekendProgram.friday,
+      sunday: weekendProgram.sunday,
+      outbound: {
+        legs: [weekendProgram.outbound],
+        departureTime: weekendProgram.outbound.dep,
+        arrivalTime: weekendProgram.outbound.arr,
+        date: weekendProgram.friday,
+      },
+      inbound: {
+        legs: [weekendProgram.inbound],
+        departureTime: weekendProgram.inbound.dep,
+        arrivalTime: weekendProgram.inbound.arr,
+        date: weekendProgram.sunday,
+      },
+    };
+    setWeekendPostcard(weekend);
+    setPostcardOpen(true);
+  }, [weekendProgram]);
 
   const togglePanel = useCallback(() => {
     setPanelOpen((current) => !current);
@@ -979,11 +1176,27 @@ export default function App() {
             name: station.name,
             lat: station.lat,
             lon: station.lon,
-            color: station.code === roulettePick ? HIGHLIGHT : AVAILABLE,
+            color:
+              station.code === roulettePick || station.code === weekendPick
+                ? HIGHLIGHT
+                : AVAILABLE,
             popup: buildPopup(list),
             count: list.length,
           });
         }
+      }
+      if (
+        weekendProgram &&
+        !points.some((p) => p.code === weekendProgram.destination.code)
+      ) {
+        points.push({
+          code: weekendProgram.destination.code,
+          name: weekendProgram.destination.name,
+          lat: weekendProgram.destination.lat,
+          lon: weekendProgram.destination.lon,
+          color: HIGHLIGHT,
+          popup: `Week-end du ${formatDate(weekendProgram.friday)} au ${formatDate(weekendProgram.sunday)}`,
+        });
       }
       return points;
     }
@@ -1069,7 +1282,7 @@ export default function App() {
         lon: s.lon,
         color: FIXED,
       }));
-      for (const dest of visibleRayonDestinations) {
+      for (const dest of activeRayonDestinations) {
         const station = getStation(dest.code);
         if (!station) continue;
         points.push({
@@ -1077,7 +1290,7 @@ export default function App() {
           name: station.name,
           lat: station.lat,
           lon: station.lon,
-          color: AVAILABLE,
+          color: dest.color ?? AVAILABLE,
           popup: buildPopup(dest.legs),
           count: dest.legs.length,
         });
@@ -1139,7 +1352,7 @@ export default function App() {
     }
 
     return [];
-  }, [mode, origin, destination, from, to, rayonOrigin, visibleLegs, visibleItineraries, visibleRayonDestinations, roulettePick, challengeResults, visibleHeatmap]);
+  }, [mode, origin, destination, from, to, rayonOrigin, visibleLegs, visibleItineraries, activeRayonDestinations, roulettePick, weekendPick, weekendProgram, challengeResults, visibleHeatmap]);
 
   const mapLines = useMemo<MapLine[]>(() => {
     if (mode === 'origin' && origin.length > 0 && visibleLegs) {
@@ -1213,7 +1426,7 @@ export default function App() {
     if (mode === 'rayon' && rayonOrigin.length > 0) {
       const lines: MapLine[] = [];
       for (const o of rayonOrigin) {
-        for (const dest of visibleRayonDestinations) {
+        for (const dest of activeRayonDestinations) {
           const d = getStation(dest.code);
           if (!d) continue;
           lines.push({
@@ -1273,15 +1486,32 @@ export default function App() {
     }
 
     return [];
-  }, [mode, origin, destination, visibleLegs, visibleItineraries, rayonOrigin, visibleRayonDestinations, selectedOutbound, selectedReturn, directionTab, challengeResults, visibleHeatmap]);
+  }, [mode, origin, destination, visibleLegs, visibleItineraries, rayonOrigin, activeRayonDestinations, selectedOutbound, selectedReturn, directionTab, challengeResults, visibleHeatmap]);
 
   const currentPostcard = directionTab === 'return' ? selectedReturn : selectedOutbound;
 
   const radiusCircle = useMemo<RadiusCircle | null>(() => {
-    if (mode !== 'rayon' || rayonOrigin.length === 0) return null;
+    if (mode !== 'rayon' || rayonKind !== 'distance' || rayonOrigin.length === 0) {
+      return null;
+    }
     const o = rayonOrigin[0];
     return { lat: o.lat, lon: o.lon, radiusKm: rayonRadius };
-  }, [mode, rayonOrigin, rayonRadius]);
+  }, [mode, rayonKind, rayonOrigin, rayonRadius]);
+
+  const halos = useMemo<HaloCircle[]>(() => {
+    if (mode !== 'rayon' || rayonKind !== 'time' || rayonOrigin.length === 0) {
+      return [];
+    }
+    const o = rayonOrigin[0];
+    return HALO_RINGS.filter((ring) => ring.minutes <= rayonTimeMax).map(
+      (ring) => ({
+        lat: o.lat,
+        lon: o.lon,
+        radiusKm: (ring.minutes / 60) * HALO_SPEED_KMH,
+        color: ring.color,
+      }),
+    );
+  }, [mode, rayonKind, rayonOrigin, rayonTimeMax]);
 
   const hasNoSelection =
     mode === 'origin' || mode === 'challenges'
@@ -1369,6 +1599,36 @@ export default function App() {
           </button>
         )}
 
+        {mode === 'origin' && origin.length > 0 && (
+          <button
+            className="roulette"
+            type="button"
+            disabled={weekendLoading || !range}
+            onClick={() => {
+              void runWeekendSurprise();
+            }}
+          >
+            {weekendLoading ? 'Recherche…' : 'Week-end surprise 🎒'}
+          </button>
+        )}
+
+        {mode === 'origin' && weekendError && (
+          <div className="hint" style={{ color: 'var(--accent)' }}>
+            {weekendError}
+          </div>
+        )}
+
+        {mode === 'origin' && weekendProgram && (
+          <WeekendProgramView
+            program={weekendProgram}
+            onReroll={() => {
+              void runWeekendSurprise();
+            }}
+            onPostcard={openWeekendPostcard}
+            onSelect={handleSelect}
+          />
+        )}
+
         {mode === 'destination' && (
           <StationMultiSelect
             label="Gares d'arrivée"
@@ -1394,14 +1654,40 @@ export default function App() {
         )}
 
         {mode === 'rayon' && rayonOrigin.length > 0 && (
-          <RadiusSlider
-            label="Rayon"
-            min={RAYON_MIN}
-            max={RAYON_MAX}
-            step={RAYON_STEP}
-            value={rayonRadius}
-            onChange={setRayonRadius}
-          />
+          <>
+            <div className="field">
+              <label>Type de halo</label>
+              <select
+                value={rayonKind}
+                onChange={(e) =>
+                  setRayonKind(e.target.value as 'distance' | 'time')
+                }
+              >
+                <option value="distance">Distance (km)</option>
+                <option value="time">Temps (isochrones)</option>
+              </select>
+            </div>
+            {rayonKind === 'distance' ? (
+              <RadiusSlider
+                label="Rayon"
+                min={RAYON_MIN}
+                max={RAYON_MAX}
+                step={RAYON_STEP}
+                value={rayonRadius}
+                onChange={setRayonRadius}
+              />
+            ) : (
+              <RadiusSlider
+                label="Temps max"
+                min={RAYON_TIME_MIN}
+                max={RAYON_TIME_MAX}
+                step={RAYON_TIME_STEP}
+                value={rayonTimeMax}
+                valueLabel={formatDuration(rayonTimeMax)}
+                onChange={setRayonTimeMax}
+              />
+            )}
+          </>
         )}
 
         {mode === 'challenges' && (
@@ -1752,7 +2038,10 @@ export default function App() {
               type="button"
               className="secondary"
               disabled={!currentPostcard}
-              onClick={() => setPostcardOpen(true)}
+              onClick={() => {
+                setWeekendPostcard(null);
+                setPostcardOpen(true);
+              }}
             >
               Générer une carte postale
             </button>
@@ -1761,7 +2050,8 @@ export default function App() {
 
         {mode === 'rayon' && rayonOrigin.length > 0 && rayonLegs != null && (
           <RayonList
-            destinations={visibleRayonDestinations}
+            destinations={activeRayonDestinations}
+            mode={rayonKind}
             onSelect={handleSelect}
           />
         )}
@@ -1788,6 +2078,8 @@ export default function App() {
             {rouletteLegs.length} départ{rouletteLegs.length > 1 ? 's' : ''} dispo
           </div>
         )}
+
+        <PunctualityPanel />
       </aside>
 
       <div
@@ -1842,6 +2134,7 @@ export default function App() {
           dark={theme === 'dark'}
           resizeToken={resizeToken}
           radiusCircle={radiusCircle}
+          halos={halos}
           onPointClick={handleSelect}
         />
         <button
@@ -1857,7 +2150,8 @@ export default function App() {
 
       {postcardOpen && (
         <PostcardModal
-          itinerary={currentPostcard}
+          itinerary={weekendPostcard ? null : currentPostcard}
+          weekend={weekendPostcard}
           theme={theme}
           onClose={() => setPostcardOpen(false)}
         />

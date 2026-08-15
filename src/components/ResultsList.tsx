@@ -1,6 +1,7 @@
 import type { Itinerary, Leg } from '../types';
 import { formatDuration, toMinutes } from '../lib/itinerary';
-import { formatDate, formatMinutes } from '../lib/format';
+import { formatDate, formatFare, formatMinutes } from '../lib/format';
+import { getFareRange } from '../lib/fares';
 
 function distinctDays(legs: Leg[]): number {
   return new Set(legs.map((leg) => leg.date).filter(Boolean)).size;
@@ -64,20 +65,24 @@ export function LegList(props: {
                 <span className="badge ok">{days} jours dispo</span>
               )}
             </div>
-            {list.map((leg, i) => (
-              <div className="row" key={i}>
-                <span className="time">
-                  {leg.date ? `${formatDate(leg.date)} · ` : ''}
-                  {leg.heure_depart} → {leg.heure_arrivee}
-                </span>
-                {leg.train_no ? <span className="badge leg">{leg.train_no}</span> : null}
-                <span className="muted">
-                  {formatDuration(
-                    toMinutes(leg.heure_arrivee) - toMinutes(leg.heure_depart),
-                  )}
-                </span>
-              </div>
-            ))}
+            {list.map((leg, i) => {
+              const fare = getFareRange(leg.origine_iata, leg.destination_iata);
+              return (
+                <div className="row" key={i}>
+                  <span className="time">
+                    {leg.date ? `${formatDate(leg.date)} · ` : ''}
+                    {leg.heure_depart} → {leg.heure_arrivee}
+                  </span>
+                  {leg.train_no ? <span className="badge leg">{leg.train_no}</span> : null}
+                  <span className="muted">
+                    {formatDuration(
+                      toMinutes(leg.heure_arrivee) - toMinutes(leg.heure_depart),
+                    )}
+                  </span>
+                  {fare ? <span className="muted fare">≈ {formatFare(fare)}</span> : null}
+                </div>
+              );
+            })}
           </div>
         );
       })}
@@ -112,6 +117,17 @@ export function ItineraryList(props: {
         const duration = itinerary.arrivalTime - itinerary.departureTime;
         const isSelected = selected === itinerary;
         const isRecord = recordMode && connections === maxConnections && connections > 0;
+        let totalFare: { min: number; max: number } | null = null;
+        for (const leg of itinerary.legs) {
+          const legFare = getFareRange(leg.from, leg.to);
+          if (!legFare) {
+            totalFare = null;
+            break;
+          }
+          totalFare = totalFare
+            ? { min: totalFare.min + legFare.min, max: totalFare.max + legFare.max }
+            : { min: legFare.min, max: legFare.max };
+        }
         return (
           <div
             className={`result-card clickable${isSelected ? ' selected' : ''}${isRecord ? ' record' : ''}`}
@@ -135,6 +151,7 @@ export function ItineraryList(props: {
             <div className="row">
               <span className="muted">{formatDuration(duration)}</span>
               {itinerary.date ? <span className="badge ok">{formatDate(itinerary.date)}</span> : null}
+              {totalFare ? <span className="muted fare">≈ {formatFare(totalFare)}</span> : null}
             </div>
             {itinerary.legs.map((leg, j) => (
               <div className="muted" key={j}>
