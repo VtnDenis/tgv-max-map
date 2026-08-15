@@ -1,0 +1,83 @@
+import type { Edge, Itinerary } from '../types';
+
+export interface ItineraryOptions {
+  maxLegs?: number;
+  minConnection?: number;
+  maxConnection?: number;
+}
+
+const MAX_RESULTS = 200;
+
+/** Parse an "HH:MM" time (optionally with seconds) into minutes since midnight. */
+export function toMinutes(hhmm: string): number {
+  const [hoursPart, minutesPart] = hhmm.split(':');
+  const hours = Number.parseInt(hoursPart ?? '', 10);
+  const minutes = Number.parseInt(minutesPart ?? '', 10);
+  return (Number.isNaN(hours) ? 0 : hours) * 60 + (Number.isNaN(minutes) ? 0 : minutes);
+}
+
+/** Find all connecting itineraries between any start in `from` and any end in `to`, within `maxLegs` legs. */
+export function findItineraries(edges: Edge[], from: string[], to: string[], options?: ItineraryOptions): Itinerary[] {
+  const maxLegs = options?.maxLegs ?? 3;
+  const minConnection = options?.minConnection ?? 15;
+  const maxConnection = options?.maxConnection;
+
+  if (maxLegs < 1 || from.length === 0 || to.length === 0) return [];
+
+  const fromSet = new Set(from);
+  const toSet = new Set(to);
+
+  const outgoing = new Map<string, Edge[]>();
+  for (const edge of edges) {
+    const list = outgoing.get(edge.from);
+    if (list) list.push(edge);
+    else outgoing.set(edge.from, [edge]);
+  }
+
+  type State = { legs: Edge[]; visited: Set<string> };
+  let queue: State[] = [];
+  for (const start of fromSet) {
+    for (const edge of outgoing.get(start) ?? []) {
+      queue.push({ legs: [edge], visited: new Set<string>([edge.from, edge.to]) });
+    }
+  }
+
+  const best = new Map<string, Map<number, number>>();
+  const results: Itinerary[] = [];
+
+  while (queue.length > 0) {
+    const next: State[] = [];
+    for (const state of queue) {
+      const last = state.legs[state.legs.length - 1];
+      if (toSet.has(last.to)) {
+        results.push({
+          legs: state.legs,
+          departureTime: state.legs[0].dep,
+          arrivalTime: last.arr,
+        });
+        continue;
+      }
+      if (state.legs.length >= maxLegs) continue;
+
+      const byLeg = best.get(last.to);
+      const previous = byLeg?.get(state.legs.length);
+      if (previous !== undefined && previous <= last.arr) continue;
+      if (byLeg) byLeg.set(state.legs.length, last.arr);
+      else best.set(last.to, new Map([[state.legs.length, last.arr]]));
+
+      for (const edge of outgoing.get(last.to) ?? []) {
+        if (state.visited.has(edge.to)) continue;
+        if (edge.dep < last.arr + minConnection) continue;
+        if (maxConnection !== undefined && edge.dep > last.arr + maxConnection) continue;
+        next.push({
+          legs: [...state.legs, edge],
+          visited: new Set(state.visited).add(edge.to),
+        });
+      }
+    }
+    queue = next;
+  }
+
+  results.sort((a, b) => a.arrivalTime - b.arrivalTime || a.legs.length - b.legs.length);
+  return results.slice(0, MAX_RESULTS);
+}

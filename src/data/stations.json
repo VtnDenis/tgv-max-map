@@ -1,0 +1,1717 @@
+{
+  "BEBMI": {
+    "name": "BRUXELLES MIDI",
+    "lat": 50.836,
+    "lon": 4.336
+  },
+  "CHAGL": {
+    "name": "VALLORBE",
+    "lat": 46.713,
+    "lon": 6.377
+  },
+  "CHAJD": {
+    "name": "ZURICH HB",
+    "lat": 47.378,
+    "lon": 8.541
+  },
+  "CHAJF": {
+    "name": "LAUSANNE",
+    "lat": 46.517,
+    "lon": 6.629
+  },
+  "CHAJP": {
+    "name": "BASEL SBB",
+    "lat": 47.5474,
+    "lon": 7.5895
+  },
+  "CHGVA": {
+    "name": "GENEVE CORNAVIN",
+    "lat": 46.21,
+    "lon": 6.142
+  },
+  "DEAGB": {
+    "name": "AUGSBURG HBF",
+    "lat": 48.3655,
+    "lon": 10.8861
+  },
+  "DEANL": {
+    "name": "LAHR SCHWARZW",
+    "lat": 48.339,
+    "lon": 7.84
+  },
+  "DEBEG": {
+    "name": "MUNCHEN HBF",
+    "lat": 48.14,
+    "lon": 11.558
+  },
+  "DEEAA": {
+    "name": "ESSLINGEN(NECKAR)",
+    "lat": 48.739,
+    "lon": 9.304
+  },
+  "DEFGB": {
+    "name": "FREIBURG (BREISGAU) HBF",
+    "lat": 47.997,
+    "lon": 7.842
+  },
+  "DEFRH": {
+    "name": "FRANKFURT AM MAIN HBF",
+    "lat": 50.106,
+    "lon": 8.663
+  },
+  "DEKLT": {
+    "name": "KAISERSLAUTERN HBF",
+    "lat": 49.436,
+    "lon": 7.768
+  },
+  "DEMHG": {
+    "name": "MANNHEIM HBF",
+    "lat": 49.479,
+    "lon": 8.469
+  },
+  "DEQKA": {
+    "name": "KARLSRUHE HBF",
+    "lat": 48.993,
+    "lon": 8.401
+  },
+  "DEQLI": {
+    "name": "VAIHINGEN (ENZ)",
+    "lat": 48.933,
+    "lon": 8.958
+  },
+  "DEQUL": {
+    "name": "ULM HBF",
+    "lat": 48.399,
+    "lon": 9.982
+  },
+  "DERSH": {
+    "name": "RINGSHEIM EUROPA PARK",
+    "lat": 48.249,
+    "lon": 7.78
+  },
+  "DESBK": {
+    "name": "SAARBRUECKEN/SARREBRUCK",
+    "lat": 49.241,
+    "lon": 6.99
+  },
+  "DESGT": {
+    "name": "STUTTGART HBF",
+    "lat": 48.784,
+    "lon": 9.182
+  },
+  "DEZCC": {
+    "name": "BADEN BADEN",
+    "lat": 48.7906,
+    "lon": 8.1905
+  },
+  "DEZPA": {
+    "name": "OFFENBURG",
+    "lat": 48.476,
+    "lon": 7.946
+  },
+  "ESBST": {
+    "name": "BARCELONA SANTS",
+    "lat": 41.3795,
+    "lon": 2.1398
+  },
+  "ESFIR": {
+    "name": "FIGUERES VILAFANT",
+    "lat": 42.265,
+    "lon": 2.943
+  },
+  "ESGRO": {
+    "name": "GIRONA",
+    "lat": 41.978,
+    "lon": 2.816
+  },
+  "FRAAW": {
+    "name": "UZERCHE",
+    "lat": 45.440540659450285,
+    "lon": 1.570388062615501
+  },
+  "FRABA": {
+    "name": "DIJON VILLE",
+    "lat": 47.322960056957335,
+    "lon": 5.027407993143413
+  },
+  "FRABG": {
+    "name": "BESANCON VIOTTE",
+    "lat": 47.24733508300953,
+    "lon": 6.021802404892518
+  },
+  "FRACE": {
+    "name": "DOLE VILLE",
+    "lat": 47.0964893976321,
+    "lon": 5.488279889942951
+  },
+  "FRACG": {
+    "name": "DAX",
+    "lat": 43.72094000784208,
+    "lon": -1.049446124682754
+  },
+  "FRACL": {
+    "name": "ANGERS SAINT LAUD",
+    "lat": 47.46437213400231,
+    "lon": -0.556772225922026
+  },
+  "FRACN": {
+    "name": "SAUMUR",
+    "lat": 47.269302977402795,
+    "lon": -0.07237979109423451
+  },
+  "FRACR": {
+    "name": "LAVAL",
+    "lat": 48.07630715479952,
+    "lon": -0.759714028231575
+  },
+  "FRADE": {
+    "name": "METZ VILLE",
+    "lat": 49.10903985534256,
+    "lon": 6.1774548908153335
+  },
+  "FRADI": {
+    "name": "DUNKERQUE",
+    "lat": 51.03188548139087,
+    "lon": 2.3669782073340873
+  },
+  "FRADJ": {
+    "name": "LILLE (intramuros)",
+    "lat": 50.636,
+    "lon": 3.063
+  },
+  "FRADM": {
+    "name": "TOURCOING",
+    "lat": 50.71665932275124,
+    "lon": 3.168291414422403
+  },
+  "FRADP": {
+    "name": "ROUBAIX",
+    "lat": 50.69597348869033,
+    "lon": 3.16326951649233
+  },
+  "FRAEA": {
+    "name": "CALAIS VILLE",
+    "lat": 50.952884284569265,
+    "lon": 1.84666553776393
+  },
+  "FRAEB": {
+    "name": "BOULOGNE VILLE",
+    "lat": 50.71526498997108,
+    "lon": 1.609995163680857
+  },
+  "FRAEE": {
+    "name": "PAU",
+    "lat": 43.291726298391296,
+    "lon": -0.37066784077398
+  },
+  "FRAEF": {
+    "name": "HENDAYE",
+    "lat": 43.35380933128191,
+    "lon": -1.781469587029062
+  },
+  "FRAEG": {
+    "name": "STRASBOURG",
+    "lat": 48.58393763846473,
+    "lon": 7.732810242658796
+  },
+  "FRAEJ": {
+    "name": "COLMAR",
+    "lat": 48.07372947895751,
+    "lon": 7.347592306492817
+  },
+  "FRAEK": {
+    "name": "MULHOUSE VILLE",
+    "lat": 47.74245238236304,
+    "lon": 7.344067185334513
+  },
+  "FRAES": {
+    "name": "AVIGNON CENTRE",
+    "lat": 43.94142989927781,
+    "lon": 4.804605581315567
+  },
+  "FRAET": {
+    "name": "LE MANS",
+    "lat": 47.994822013139185,
+    "lon": 0.1945457700022945
+  },
+  "FRAEZ": {
+    "name": "LE HAVRE",
+    "lat": 49.493099779289984,
+    "lon": 0.127363090864577
+  },
+  "FRAFJ": {
+    "name": "ALBI VILLE",
+    "lat": 43.9223469965895,
+    "lon": 2.137784640369475
+  },
+  "FRAFW": {
+    "name": "TOURS",
+    "lat": 47.389302268747564,
+    "lon": 0.6938159011521113
+  },
+  "FRAGF": {
+    "name": "AGEN",
+    "lat": 44.208341089900124,
+    "lon": 0.621048372800292
+  },
+  "FRAGQ": {
+    "name": "LIMOGES BENEDICTINS",
+    "lat": 45.836407088576934,
+    "lon": 1.268168667987851
+  },
+  "FRAGR": {
+    "name": "MODANE",
+    "lat": 45.19259884574342,
+    "lon": 6.657471001634405
+  },
+  "FRAIE": {
+    "name": "AIX EN PROVENCE TGV",
+    "lat": 43.45523656965738,
+    "lon": 5.31730675557901
+  },
+  "FRAMA": {
+    "name": "ALBI MADELEINE",
+    "lat": 43.93862034175393,
+    "lon": 2.141024616620396
+  },
+  "FRANG": {
+    "name": "ANGOULEME",
+    "lat": 45.65364279342451,
+    "lon": 0.16414524593911
+  },
+  "FRARM": {
+    "name": "ARGELES SUR MER",
+    "lat": 42.54403628665191,
+    "lon": 3.021638961103582
+  },
+  "FRARV": {
+    "name": "ARVANT",
+    "lat": 45.365318541611714,
+    "lon": 3.31053930071958
+  },
+  "FRAUR": {
+    "name": "AURILLAC",
+    "lat": 44.92128287269628,
+    "lon": 2.436202111452767
+  },
+  "FRAVG": {
+    "name": "AVIGNON TGV",
+    "lat": 43.9219062061422,
+    "lon": 4.786176168172139
+  },
+  "FRBDT": {
+    "name": "RETHEL",
+    "lat": 49.50465172857666,
+    "lon": 4.37029329929383
+  },
+  "FRBES": {
+    "name": "BREST",
+    "lat": 48.38825812296375,
+    "lon": -4.477628311775779
+  },
+  "FRBFO": {
+    "name": "VITRY LE FRANCOIS",
+    "lat": 48.71778914204672,
+    "lon": 4.587569249125138
+  },
+  "FRBHA": {
+    "name": "COMMERCY",
+    "lat": 48.7662868828759,
+    "lon": 5.587274512008781
+  },
+  "FRBIQ": {
+    "name": "BIARRITZ",
+    "lat": 43.45919534222734,
+    "lon": -1.545761953624888
+  },
+  "FRBOJ": {
+    "name": "BORDEAUX ST JEAN",
+    "lat": 44.825962381396884,
+    "lon": -0.5559619745758243
+  },
+  "FRBOU": {
+    "name": "BOURGES",
+    "lat": 47.094618136609675,
+    "lon": 2.394323089977617
+  },
+  "FRBQT": {
+    "name": "FORBACH",
+    "lat": 49.189372195850346,
+    "lon": 6.900869177186538
+  },
+  "FRBVE": {
+    "name": "BRIVE LA GAILLARDE",
+    "lat": 45.15178668184799,
+    "lon": 1.529166661322022
+  },
+  "FRBXB": {
+    "name": "BRETENOUX BIARS",
+    "lat": 44.92753201313112,
+    "lon": 1.844127782707252
+  },
+  "FRBZR": {
+    "name": "BEZIERS",
+    "lat": 43.33672106395229,
+    "lon": 3.214387816667779
+  },
+  "FRCCF": {
+    "name": "CARCASSONNE",
+    "lat": 43.217984967322316,
+    "lon": 2.347754780638105
+  },
+  "FRCCY": {
+    "name": "CULMONT CHALINDREY",
+    "lat": 47.80915847323734,
+    "lon": 5.444591780220218
+  },
+  "FRCDC": {
+    "name": "CAPDENAC",
+    "lat": 44.57872736652831,
+    "lon": 2.077223007778908
+  },
+  "FRCFE": {
+    "name": "CLERMONT FERRAND",
+    "lat": 45.778499049968005,
+    "lon": 3.100379197092955
+  },
+  "FRCHR": {
+    "name": "CHATEAUROUX",
+    "lat": 46.81015314262225,
+    "lon": 1.701209943933211
+  },
+  "FRCKH": {
+    "name": "CROIX WASQUEHAL",
+    "lat": 50.679144568986416,
+    "lon": 3.138716972162287
+  },
+  "FRCMF": {
+    "name": "CHAMBERY CHALLES LES EAUX",
+    "lat": 45.57329452235341,
+    "lon": 5.918863875710412
+  },
+  "FRCRE": {
+    "name": "CREST",
+    "lat": 44.73033017773909,
+    "lon": 5.01558883215303
+  },
+  "FRCVU": {
+    "name": "RANG DU FLIERS VERTON BERCK",
+    "lat": 50.407,
+    "lon": 1.593
+  },
+  "FRDHT": {
+    "name": "VERSAILLES CHANTIERS",
+    "lat": 48.79547945500756,
+    "lon": 2.1374518653559824
+  },
+  "FRDIE": {
+    "name": "DIE",
+    "lat": 44.75837755770769,
+    "lon": 5.362579975522965
+  },
+  "FRDJU": {
+    "name": "MASSY TGV",
+    "lat": 48.71788509711818,
+    "lon": 2.254849950629433
+  },
+  "FRDOB": {
+    "name": "DOLUS D'OLERON",
+    "lat": 45.9,
+    "lon": -1.27
+  },
+  "FRDOL": {
+    "name": "DOL DE BRETAGNE",
+    "lat": 48.543874805642204,
+    "lon": -1.749787732845195
+  },
+  "FREAH": {
+    "name": "CHAMPAGNE ARDENNE TGV",
+    "lat": 49.21411963105917,
+    "lon": 3.994675164414123
+  },
+  "FREAJ": {
+    "name": "MEUSE TGV",
+    "lat": 48.978506341284344,
+    "lon": 5.273714507612137
+  },
+  "FREAM": {
+    "name": "LORRAINE TGV",
+    "lat": 48.947,
+    "lon": 6.17
+  },
+  "FRECO": {
+    "name": "QUIMPERLE",
+    "lat": 47.8695396214717,
+    "lon": -3.553050960955289
+  },
+  "FREFN": {
+    "name": "ANCENIS",
+    "lat": 47.36949163042046,
+    "lon": -1.177842497062386
+  },
+  "FREGR": {
+    "name": "PORNICHET",
+    "lat": 47.27066127767772,
+    "lon": -2.344704844934861
+  },
+  "FREGS": {
+    "name": "LE POULIGUEN",
+    "lat": 47.282624377337214,
+    "lon": -2.433227448877355
+  },
+  "FREGU": {
+    "name": "LE CROISIC",
+    "lat": 47.289762242077856,
+    "lon": -2.506895317400401
+  },
+  "FREIP": {
+    "name": "SURGERES",
+    "lat": 46.11341387638201,
+    "lon": -0.76110014332837
+  },
+  "FREJC": {
+    "name": "ST MAIXENT (DEUX SEVRES)",
+    "lat": 46.41,
+    "lon": -0.21
+  },
+  "FREMR": {
+    "name": "JONZAC",
+    "lat": 45.439091339152064,
+    "lon": -0.443483887052462
+  },
+  "FRENC": {
+    "name": "NANCY",
+    "lat": 48.6906271876899,
+    "lon": 6.173453947277218
+  },
+  "FREPL": {
+    "name": "EPINAL",
+    "lat": 48.177782023490956,
+    "lon": 6.441424945910085
+  },
+  "FRESL": {
+    "name": "VENDOME VILLIERS SUR LOIR",
+    "lat": 47.80945762228734,
+    "lon": 1.014993503843474
+  },
+  "FRETA": {
+    "name": "ETAPLES   LE TOUQUET",
+    "lat": 50.51566525668157,
+    "lon": 1.6436864412729606
+  },
+  "FRFAC": {
+    "name": "BIGANOS FACTURE",
+    "lat": 44.6346,
+    "lon": -0.935
+  },
+  "FRFCJ": {
+    "name": "LA TESTE",
+    "lat": 44.634,
+    "lon": -1.145
+  },
+  "FRFIG": {
+    "name": "FIGEAC",
+    "lat": 44.60398819367356,
+    "lon": 2.0368546219337613
+  },
+  "FRFMN": {
+    "name": "ISSOUDUN",
+    "lat": 46.95037581329002,
+    "lon": 1.986486746326806
+  },
+  "FRFMT": {
+    "name": "ARGENTON SUR CREUSE",
+    "lat": 46.59335754679659,
+    "lon": 1.517643311241987
+  },
+  "FRFNI": {
+    "name": "NIMES CENTRE",
+    "lat": 43.832,
+    "lon": 4.366
+  },
+  "FRFPH": {
+    "name": "ST GAUDENS",
+    "lat": 43.1043552906934,
+    "lon": 0.727652913925646
+  },
+  "FRFPU": {
+    "name": "SAVERDUN",
+    "lat": 43.2393788222438,
+    "lon": 1.570693505005694
+  },
+  "FRFPW": {
+    "name": "AUTERIVE",
+    "lat": 43.34889289615026,
+    "lon": 1.468589831135334
+  },
+  "FRFQF": {
+    "name": "PORTE PUYMORENS",
+    "lat": 42.53895936238942,
+    "lon": 1.824842260958352
+  },
+  "FRFQG": {
+    "name": "L'HOSPITALET PRES L'AND.",
+    "lat": 42.588,
+    "lon": 1.801
+  },
+  "FRFQH": {
+    "name": "MERENS LES VALS",
+    "lat": 42.65936456855758,
+    "lon": 1.83733661606178
+  },
+  "FRFQI": {
+    "name": "LUZENAC GARANOU",
+    "lat": 42.76430323972055,
+    "lon": 1.753240429190231
+  },
+  "FRFQK": {
+    "name": "LES CABANNES",
+    "lat": 42.78643042784719,
+    "lon": 1.686266851265799
+  },
+  "FRFQM": {
+    "name": "TARASCON SUR ARIEGE",
+    "lat": 42.849488339375135,
+    "lon": 1.599986443136916
+  },
+  "FRFRA": {
+    "name": "FRASNE",
+    "lat": 46.857704219428825,
+    "lon": 6.157500296587465
+  },
+  "FRFSA": {
+    "name": "ROCAMADOUR PADIRAC",
+    "lat": 44.818239589805536,
+    "lon": 1.657443988069947
+  },
+  "FRFSB": {
+    "name": "GRAMAT",
+    "lat": 44.77346913217628,
+    "lon": 1.722316177033146
+  },
+  "FRFSD": {
+    "name": "ASSIER",
+    "lat": 44.67470726733677,
+    "lon": 1.869375173356973
+  },
+  "FRFSI": {
+    "name": "GOURDON",
+    "lat": 44.74065794686779,
+    "lon": 1.389598402634813
+  },
+  "FRFSQ": {
+    "name": "AUBIN",
+    "lat": 44.527366678994674,
+    "lon": 2.239091365724155
+  },
+  "FRFSR": {
+    "name": "CRANSAC",
+    "lat": 44.522936850067055,
+    "lon": 2.271752441163691
+  },
+  "FRFST": {
+    "name": "ST CHRISTOPHE",
+    "lat": 44.464787751590286,
+    "lon": 2.407481693607086
+  },
+  "FRFTA": {
+    "name": "CAUSSADE(TARN ET GARONNE)",
+    "lat": 44.163,
+    "lon": 1.538
+  },
+  "FRFWA": {
+    "name": "CARMAUX",
+    "lat": 44.04850659308988,
+    "lon": 2.152253438233018
+  },
+  "FRFWF": {
+    "name": "NAUCELLE",
+    "lat": 44.18542607167412,
+    "lon": 2.363460838767924
+  },
+  "FRGAT": {
+    "name": "GAP",
+    "lat": 44.56368066191417,
+    "lon": 6.085343549382826
+  },
+  "FRGBG": {
+    "name": "LAROQUEBROU BATIMENT VOYAGEURS",
+    "lat": 44.968,
+    "lon": 2.192
+  },
+  "FRGFI": {
+    "name": "ORTHEZ",
+    "lat": 43.484128372441816,
+    "lon": -0.768133329786103
+  },
+  "FRGGP": {
+    "name": "GUINGAMP",
+    "lat": 48.55569695287829,
+    "lon": -3.142153441476763
+  },
+  "FRGHA": {
+    "name": "ST VINCENT DE TYROSSE",
+    "lat": 43.65768465126451,
+    "lon": -1.305500392027132
+  },
+  "FRGNB": {
+    "name": "GRENOBLE",
+    "lat": 45.19128387819784,
+    "lon": 5.714309253432913
+  },
+  "FRGWE": {
+    "name": "MONTBARD",
+    "lat": 47.61861672982738,
+    "lon": 4.335510197305902
+  },
+  "FRHGU": {
+    "name": "MACON VILLE",
+    "lat": 46.30190762055253,
+    "lon": 4.823839315508944
+  },
+  "FRHHD": {
+    "name": "SAINT ETIENNE CHATEAUCREUX",
+    "lat": 45.44437908744403,
+    "lon": 4.396706404871459
+  },
+  "FRHLB": {
+    "name": "ISSOIRE",
+    "lat": 45.54410777430989,
+    "lon": 3.254208169172224
+  },
+  "FRHLE": {
+    "name": "BRASSAC LES MINES STE FLORINE",
+    "lat": 45.414079259619086,
+    "lon": 3.330155917792313
+  },
+  "FRHMY": {
+    "name": "MASSIAC BLESLE",
+    "lat": 45.25,
+    "lon": 3.2
+  },
+  "FRHOJ": {
+    "name": "SAINT AVRE LA CHAMBRE",
+    "lat": 45.35363224777038,
+    "lon": 6.301616999000014
+  },
+  "FRHPG": {
+    "name": "LANDRY",
+    "lat": 45.573897423162855,
+    "lon": 6.733284026205594
+  },
+  "FRHPN": {
+    "name": "ST JEAN DE MAURIENNE ARVAN",
+    "lat": 45.2,
+    "lon": 6.37
+  },
+  "FRHQN": {
+    "name": "NURIEUX GARE",
+    "lat": 46.18392783869998,
+    "lon": 5.533341540859857
+  },
+  "FRHTZ": {
+    "name": "CLUSES (HAUTE SAVOIE)",
+    "lat": 46.06,
+    "lon": 6.58
+  },
+  "FRHZA": {
+    "name": "ARLES",
+    "lat": 43.681727874841975,
+    "lon": 4.63343002456446
+  },
+  "FRHZK": {
+    "name": "HAZEBROUCK",
+    "lat": 50.72523369916931,
+    "lon": 2.5415003158542766
+  },
+  "FRIFP": {
+    "name": "LUC EN DIOIS",
+    "lat": 44.61403808852461,
+    "lon": 5.454832629017519
+  },
+  "FRIGS": {
+    "name": "CHORGES",
+    "lat": 44.545727228563074,
+    "lon": 6.271773650688589
+  },
+  "FRIGV": {
+    "name": "EMBRUN",
+    "lat": 44.56674756944446,
+    "lon": 6.496152520286437
+  },
+  "FRIGZ": {
+    "name": "MONTDAUPHIN GUILLESTRE",
+    "lat": 44.674572708782506,
+    "lon": 6.615536685768046
+  },
+  "FRIHC": {
+    "name": "L'ARGENTIERE LES ECRINS",
+    "lat": 44.79098320934446,
+    "lon": 6.556249737151195
+  },
+  "FRILP": {
+    "name": "PORT LA NOUVELLE",
+    "lat": 43.019867379936926,
+    "lon": 3.038711639290565
+  },
+  "FRILQ": {
+    "name": "LEUCATE LA FRANQUI",
+    "lat": 42.932654375304985,
+    "lon": 3.012754202467938
+  },
+  "FRIMC": {
+    "name": "CEILHES ROQUEREDONDE",
+    "lat": 43.80532043669554,
+    "lon": 3.169334504011488
+  },
+  "FRIMG": {
+    "name": "LE BOUSQUET D'ORB",
+    "lat": 43.67933219482438,
+    "lon": 3.165667715322664
+  },
+  "FRIMH": {
+    "name": "BEDARIEUX",
+    "lat": 43.610320577421064,
+    "lon": 3.150455617925504
+  },
+  "FRIMK": {
+    "name": "MAGALAS",
+    "lat": 43.46767292795387,
+    "lon": 3.229498811227678
+  },
+  "FRIMW": {
+    "name": "ST FLOUR CHAUDES AIGUES",
+    "lat": 45.03430569061607,
+    "lon": 3.123273715561132
+  },
+  "FRINB": {
+    "name": "SAINT CHELY D'APCHER",
+    "lat": 44.78843433613827,
+    "lon": 3.272571382393344
+  },
+  "FRINC": {
+    "name": "AUMONT AUBRAC",
+    "lat": 44.706191224263165,
+    "lon": 3.291178943815673
+  },
+  "FRINE": {
+    "name": "MARVEJOLS",
+    "lat": 44.53468246419865,
+    "lon": 3.269484432074248
+  },
+  "FRINH": {
+    "name": "BANASSAC LA CANOURGUE",
+    "lat": 44.43951608224107,
+    "lon": 3.185828543491926
+  },
+  "FRINJ": {
+    "name": "CAMPAGNAC ST GENIEZ",
+    "lat": 44.41402708938388,
+    "lon": 3.055215536040548
+  },
+  "FRINM": {
+    "name": "SAINT GEORGES DE LUZENCON",
+    "lat": 44.05322160241949,
+    "lon": 2.979847449739712
+  },
+  "FRINN": {
+    "name": "SAINT ROME DE CERNON",
+    "lat": 44.00132147230305,
+    "lon": 2.969044671872089
+  },
+  "FRINO": {
+    "name": "TOURNEMIRE ROQUEFORT",
+    "lat": 43.96423944524902,
+    "lon": 3.0214883965572117
+  },
+  "FRIOF": {
+    "name": "RIVESALTES",
+    "lat": 42.766340556686266,
+    "lon": 2.86775128219302
+  },
+  "FRIOG": {
+    "name": "ELNE",
+    "lat": 42.59729113597545,
+    "lon": 2.9634033449999198
+  },
+  "FRJCA": {
+    "name": "CANNES",
+    "lat": 43.55401892106619,
+    "lon": 7.019196676351166
+  },
+  "FRJDQ": {
+    "name": "LYON ST EXUPERY TGV.",
+    "lat": 45.72093606755898,
+    "lon": 5.075877861112024
+  },
+  "FRJEE": {
+    "name": "LA BAULE ESCOUBLAC",
+    "lat": 47.28869813033697,
+    "lon": -2.389259977775439
+  },
+  "FRJSY": {
+    "name": "JUVISY",
+    "lat": 48.68884284805654,
+    "lon": 2.3820572173809924
+  },
+  "FRKGD": {
+    "name": "COMMERCY ZONE DU SEUGNON",
+    "lat": 48.76,
+    "lon": 5.59
+  },
+  "FRLAB": {
+    "name": "LES AUBRAIS ORLEANS",
+    "lat": 47.92697834613309,
+    "lon": 1.9062086215240115
+  },
+  "FRLAI": {
+    "name": "LANNION",
+    "lat": 48.727322482957305,
+    "lon": -3.460321907221138
+  },
+  "FRLAM": {
+    "name": "LAMBALLE",
+    "lat": 48.46597378983047,
+    "lon": -2.510515956755004
+  },
+  "FRLCN": {
+    "name": "LUCON",
+    "lat": 46.46353815735384,
+    "lon": -1.165706356314116
+  },
+  "FRLCO": {
+    "name": "LACANAU OCEAN",
+    "lat": 44.867,
+    "lon": -1.179
+  },
+  "FRLDE": {
+    "name": "LOURDES",
+    "lat": 43.100485544537825,
+    "lon": -0.043033187648334
+  },
+  "FRLFN": {
+    "name": "LA NOUE",
+    "lat": 45.1,
+    "lon": -1.15
+  },
+  "FRLLE": {
+    "name": "LILLE (intramuros)",
+    "lat": 50.636,
+    "lon": 3.063
+  },
+  "FRLMR": {
+    "name": "LE MONASTIER",
+    "lat": 44.501262833199974,
+    "lon": 3.2502867673915308
+  },
+  "FRLNE": {
+    "name": "LUNEVILLE",
+    "lat": 48.58763637317349,
+    "lon": 6.495489043350034
+  },
+  "FRLNZ": {
+    "name": "LANNEMEZAN",
+    "lat": 43.114103985313605,
+    "lon": 0.3870600743875585
+  },
+  "FRLPD": {
+    "name": "LYON (intramuros)",
+    "lat": 45.76,
+    "lon": 4.86
+  },
+  "FRLPE": {
+    "name": "LYON (intramuros)",
+    "lat": 45.76,
+    "lon": 4.86
+  },
+  "FRLPZ": {
+    "name": "SOUILLY",
+    "lat": 49.03,
+    "lon": 5.28
+  },
+  "FRLRH": {
+    "name": "LA ROCHELLE VILLE",
+    "lat": 46.15174194566663,
+    "lon": -1.146583707929543
+  },
+  "FRLRT": {
+    "name": "LORIENT",
+    "lat": 47.75505481177877,
+    "lon": -3.36677047751369
+  },
+  "FRLSO": {
+    "name": "LES SABLES D'OLONNE",
+    "lat": 46.500180558548664,
+    "lon": -1.781633342822514
+  },
+  "FRLST": {
+    "name": "LA SOUTERRAINE",
+    "lat": 46.240375636672795,
+    "lon": 1.491832830097604
+  },
+  "FRMAU": {
+    "name": "MILLAU",
+    "lat": 44.092216067773066,
+    "lon": 3.063104607192293
+  },
+  "FRMAZ": {
+    "name": "MIRAMAS",
+    "lat": 43.580913463310196,
+    "lon": 5.000376081140344
+  },
+  "FRMBC": {
+    "name": "MARSEILLE BLANCARDE",
+    "lat": 43.29632402283791,
+    "lon": 5.4069353223580805
+  },
+  "FRMCD": {
+    "name": "MOUCHARD",
+    "lat": 46.97622777358735,
+    "lon": 5.8005151675317395
+  },
+  "FRMLT": {
+    "name": "MACON LOCHE TGV",
+    "lat": 46.28278181979825,
+    "lon": 4.778443228924178
+  },
+  "FRMLV": {
+    "name": "MARNE LA VALLEE CHESSY",
+    "lat": 48.87,
+    "lon": 2.783
+  },
+  "FRMLW": {
+    "name": "AEROPORT ROISSY CDG 2 TGV",
+    "lat": 49.0038,
+    "lon": 2.5708
+  },
+  "FRMPL": {
+    "name": "MONTPELLIER SAINT ROCH",
+    "lat": 43.60609107474913,
+    "lon": 3.882757509945222
+  },
+  "FRMPU": {
+    "name": "MASSY PALAISEAU",
+    "lat": 48.728020998932934,
+    "lon": 2.261136456265001
+  },
+  "FRMSC": {
+    "name": "MARSEILLE ST CHARLES",
+    "lat": 43.30643918450367,
+    "lon": 5.3797024564174505
+  },
+  "FRMTE": {
+    "name": "MANTES LA JOLIE",
+    "lat": 48.98945281420564,
+    "lon": 1.7030490826587956
+  },
+  "FRMTJ": {
+    "name": "MONTREJEAU GOURDAN POLIGNAN",
+    "lat": 43.07833608194762,
+    "lon": 0.572214870568817
+  },
+  "FRMXN": {
+    "name": "MORLAIX",
+    "lat": 48.57846300002021,
+    "lon": -3.830681429397871
+  },
+  "FRNCH": {
+    "name": "NEUFCHATEAU",
+    "lat": 48.35838340236671,
+    "lon": 5.690480399338334
+  },
+  "FRNCY": {
+    "name": "ANNECY",
+    "lat": 45.902210943744414,
+    "lon": 6.121832970766058
+  },
+  "FRNEU": {
+    "name": "NEUSSARGUES",
+    "lat": 45.12380745598188,
+    "lon": 2.985693916933535
+  },
+  "FRNIC": {
+    "name": "NICE VILLE",
+    "lat": 43.70493362527495,
+    "lon": 7.262059427898337
+  },
+  "FRNIT": {
+    "name": "NIORT",
+    "lat": 46.32016407877934,
+    "lon": -0.453654247984217
+  },
+  "FRNTE": {
+    "name": "NANTES",
+    "lat": 47.216885552931785,
+    "lon": -1.542064606346076
+  },
+  "FRNVS": {
+    "name": "NEVERS",
+    "lat": 46.98732017818344,
+    "lon": 3.150515693650445
+  },
+  "FRPAZ": {
+    "name": "PARIS (intramuros)",
+    "lat": 48.853,
+    "lon": 2.348
+  },
+  "FRPBE": {
+    "name": "PARIS (intramuros)",
+    "lat": 48.853,
+    "lon": 2.348
+  },
+  "FRPFH": {
+    "name": "PIERREFITTE SUR AIRE",
+    "lat": 48.96,
+    "lon": 5.33
+  },
+  "FRPFI": {
+    "name": "SAINT MIHIEL",
+    "lat": 48.889,
+    "lon": 5.54
+  },
+  "FRPFJ": {
+    "name": "LEROUVILLE CENTRE",
+    "lat": 48.793,
+    "lon": 5.544
+  },
+  "FRPGF": {
+    "name": "PERPIGNAN",
+    "lat": 42.69621526112407,
+    "lon": 2.879350450581682
+  },
+  "FRPIS": {
+    "name": "POITIERS",
+    "lat": 46.582364264631224,
+    "lon": 0.332786866293225
+  },
+  "FRPLT": {
+    "name": "PLOUARET TREGOR",
+    "lat": 48.608302333899125,
+    "lon": -3.450795582892944
+  },
+  "FRPLY": {
+    "name": "PARIS (intramuros)",
+    "lat": 48.853,
+    "lon": 2.348
+  },
+  "FRPMO": {
+    "name": "PARIS (intramuros)",
+    "lat": 48.853,
+    "lon": 2.348
+  },
+  "FRPMS": {
+    "name": "PAMIERS",
+    "lat": 43.116113187989036,
+    "lon": 1.619598176044641
+  },
+  "FRPNO": {
+    "name": "PARIS (intramuros)",
+    "lat": 48.853,
+    "lon": 2.348
+  },
+  "FRPOE": {
+    "name": "ST PIERRE D'OLERON",
+    "lat": 45.94,
+    "lon": -1.31
+  },
+  "FRPOR": {
+    "name": "LES PORTES EN RE",
+    "lat": 46.25,
+    "lon": -1.5
+  },
+  "FRPST": {
+    "name": "PARIS (intramuros)",
+    "lat": 48.853,
+    "lon": 2.348
+  },
+  "FRQAI": {
+    "name": "AIME LA PLAGNE",
+    "lat": 45.55437010064511,
+    "lon": 6.648428848434677
+  },
+  "FRQAM": {
+    "name": "AMIENS",
+    "lat": 49.889914873127346,
+    "lon": 2.310239759171981
+  },
+  "FRQBM": {
+    "name": "BOURG SAINT MAURICE",
+    "lat": 45.61812064251317,
+    "lon": 6.771556820848323
+  },
+  "FRQMU": {
+    "name": "MOUTIERS SALINS BRIDES LES BAINS",
+    "lat": 45.4865699139918,
+    "lon": 6.531304710171161
+  },
+  "FRQNJ": {
+    "name": "ANNEMASSE",
+    "lat": 46.19986580316709,
+    "lon": 6.237052781762452
+  },
+  "FRQRV": {
+    "name": "ARRAS",
+    "lat": 50.286583000316696,
+    "lon": 2.781866372897896
+  },
+  "FRQTJ": {
+    "name": "CHARTRES",
+    "lat": 48.44926973401599,
+    "lon": 1.482170133822161
+  },
+  "FRRCO": {
+    "name": "ROCHEFORT",
+    "lat": 45.94782663886774,
+    "lon": -0.961942062375049
+  },
+  "FRRDZ": {
+    "name": "RODEZ",
+    "lat": 44.36265275692561,
+    "lon": 2.580264603066841
+  },
+  "FRRHE": {
+    "name": "REIMS",
+    "lat": 49.25946798426691,
+    "lon": 4.024434919226614
+  },
+  "FRRIO": {
+    "name": "RIOM CHATEL GUYON",
+    "lat": 45.89000309832086,
+    "lon": 3.1210806308266204
+  },
+  "FRRNE": {
+    "name": "ROANNE",
+    "lat": 46.04126628287341,
+    "lon": 4.062065025759908
+  },
+  "FRRNS": {
+    "name": "RENNES",
+    "lat": 48.103377136912094,
+    "lon": -1.670824886184602
+  },
+  "FRRNT": {
+    "name": "REMIREMONT",
+    "lat": 48.0168610843891,
+    "lon": 6.598309116680633
+  },
+  "FRRPJ": {
+    "name": "RIVEDOUX PLAGE",
+    "lat": 46.16,
+    "lon": -1.28
+  },
+  "FRRSP": {
+    "name": "ROSPORDEN",
+    "lat": 47.96044841902224,
+    "lon": -3.83279554849377
+  },
+  "FRSAB": {
+    "name": "SABLE SUR SARTHE",
+    "lat": 47.84186269241494,
+    "lon": -0.342211741507528
+  },
+  "FRSBG": {
+    "name": "SARREBOURG",
+    "lat": 48.738486278999005,
+    "lon": 7.051735035810534
+  },
+  "FRSBK": {
+    "name": "ST BRIEUC",
+    "lat": 48.507078124637694,
+    "lon": -2.764001029318455
+  },
+  "FRSDM": {
+    "name": "ST DENIS PRES MARTEL",
+    "lat": 44.94571803823343,
+    "lon": 1.666495861437176
+  },
+  "FRSGF": {
+    "name": "SAINT GERMAIN DES FOSSES",
+    "lat": 46.21045008121368,
+    "lon": 3.428457643530207
+  },
+  "FRSHY": {
+    "name": "SAINT MIHIEL DETENTION",
+    "lat": 48.889,
+    "lon": 5.54
+  },
+  "FRSHZ": {
+    "name": "FRESNES AU MONT",
+    "lat": 48.85,
+    "lon": 5.44
+  },
+  "FRSIA": {
+    "name": "SAMPIGNY CENTRE",
+    "lat": 48.83,
+    "lon": 5.67
+  },
+  "FRSME": {
+    "name": "ST MARTIN DE RE",
+    "lat": 46.2,
+    "lon": -1.36
+  },
+  "FRSMR": {
+    "name": "STE MARIE DE RE",
+    "lat": 46.15,
+    "lon": -1.31
+  },
+  "FRSNE": {
+    "name": "SAVERNE",
+    "lat": 48.74447251799484,
+    "lon": 7.36088374418271
+  },
+  "FRSNR": {
+    "name": "ST NAZAIRE",
+    "lat": 47.28675483094523,
+    "lon": -2.2111771404119525
+  },
+  "FRSOU": {
+    "name": "SOUILLAC",
+    "lat": 44.90245284534552,
+    "lon": 1.465178762200956
+  },
+  "FRSTH": {
+    "name": "CALAIS FRETHUN",
+    "lat": 50.9012185570295,
+    "lon": 1.8124204568753848
+  },
+  "FRSUF": {
+    "name": "MONTPELLIER SUD DE FRANCE",
+    "lat": 43.59059396781462,
+    "lon": 3.913503031859993
+  },
+  "FRSVC": {
+    "name": "SEVERAC LE CHATEAU",
+    "lat": 44.31891123060801,
+    "lon": 3.0597440957109203
+  },
+  "FRSZE": {
+    "name": "SAINCAIZE",
+    "lat": 46.93303245585463,
+    "lon": 3.0715467113144177
+  },
+  "FRTGO": {
+    "name": "FUTUROSCOPE",
+    "lat": 46.66982364367344,
+    "lon": 0.378103406681546
+  },
+  "FRTHP": {
+    "name": "TGV HAUTE PICARDIE",
+    "lat": 49.85864116311177,
+    "lon": 2.832196326854104
+  },
+  "FRTJA": {
+    "name": "BELFORT MONTBELIARD TGV",
+    "lat": 47.58602332147397,
+    "lon": 6.898445295065638
+  },
+  "FRTJB": {
+    "name": "BESANCON FRANCHE COMTE TGV",
+    "lat": 47.308764747054475,
+    "lon": 5.956208298160104
+  },
+  "FRTLN": {
+    "name": "TOULON",
+    "lat": 43.128429614330386,
+    "lon": 5.930136019316695
+  },
+  "FRTOL": {
+    "name": "TOUL",
+    "lat": 48.678584622361726,
+    "lon": 5.877624328283565
+  },
+  "FRUIP": {
+    "name": "QUIMPER",
+    "lat": 47.99487039965011,
+    "lon": -4.092536500581428
+  },
+  "FRURD": {
+    "name": "ROUEN RIVE DROITE",
+    "lat": 49.44928900245183,
+    "lon": 1.093183957618656
+  },
+  "FRUTL": {
+    "name": "LOIX",
+    "lat": 46.23,
+    "lon": -1.43
+  },
+  "FRUTM": {
+    "name": "BOURCEFRANC LE CHAPUS",
+    "lat": 45.843,
+    "lon": -1.133
+  },
+  "FRUTN": {
+    "name": "MARENNES",
+    "lat": 45.823,
+    "lon": -1.107
+  },
+  "FRVAF": {
+    "name": "VALENCE VILLE",
+    "lat": 44.926840971953496,
+    "lon": 4.892902011813111
+  },
+  "FRVDY": {
+    "name": "VEYNES DEVOLUY",
+    "lat": 44.53186536492141,
+    "lon": 5.8158937890730815
+  },
+  "FRVHY": {
+    "name": "VICHY",
+    "lat": 46.126839212235836,
+    "lon": 3.430724834832554
+  },
+  "FRVLA": {
+    "name": "VALENCE TGV AUVERGNE RHONE ALPES",
+    "lat": 44.989,
+    "lon": 4.978
+  },
+  "FRVNE": {
+    "name": "VANNES",
+    "lat": 47.665073113111184,
+    "lon": -2.752854070002813
+  },
+  "FRVZD": {
+    "name": "VIVIEZ DECAZEVILLE",
+    "lat": 44.55595253532143,
+    "lon": 2.218316324853336
+  },
+  "FRXAC": {
+    "name": "ARCACHON",
+    "lat": 44.6587,
+    "lon": -1.1655
+  },
+  "FRXAG": {
+    "name": "AGDE",
+    "lat": 43.31685035212862,
+    "lon": 3.461673234703399
+  },
+  "FRXAI": {
+    "name": "AIX LES BAINS LE REVARD",
+    "lat": 45.6888963905625,
+    "lon": 5.908835248475455
+  },
+  "FRXAT": {
+    "name": "ANTIBES",
+    "lat": 43.58621553543314,
+    "lon": 7.119346976490508
+  },
+  "FRXAV": {
+    "name": "ALBERTVILLE",
+    "lat": 45.669083062761146,
+    "lon": 6.372403266170847
+  },
+  "FRXBC": {
+    "name": "BRIANCON",
+    "lat": 44.88961277723656,
+    "lon": 6.632590100904112
+  },
+  "FRXBD": {
+    "name": "BAR LE DUC",
+    "lat": 48.77364611023807,
+    "lon": 5.167222994123416
+  },
+  "FRXBF": {
+    "name": "BELLEGARDE SUR VALSERINE GARE",
+    "lat": 46.1114,
+    "lon": 5.8239
+  },
+  "FRXBH": {
+    "name": "BETHUNE",
+    "lat": 50.52052309013781,
+    "lon": 2.641981278861814
+  },
+  "FRXBK": {
+    "name": "BOURG EN BRESSE",
+    "lat": 46.20011468759171,
+    "lon": 5.214732264350451
+  },
+  "FRXBQ": {
+    "name": "BLOIS   CHAMBORD",
+    "lat": 47.58536368242396,
+    "lon": 1.323609474757427
+  },
+  "FRXBU": {
+    "name": "BANYULS SUR MER",
+    "lat": 42.48289092162868,
+    "lon": 3.124865814209837
+  },
+  "FRXBV": {
+    "name": "BEAUNE",
+    "lat": 47.02265086281216,
+    "lon": 4.848519625759568
+  },
+  "FRXBY": {
+    "name": "BAYONNE",
+    "lat": 43.496731994264266,
+    "lon": -1.471550649849036
+  },
+  "FRXCC": {
+    "name": "LE CREUSOT MONTCEAU MONTCHANIN",
+    "lat": 46.76527450896411,
+    "lon": 4.500380720627583
+  },
+  "FRXCD": {
+    "name": "CHALON SUR SAONE",
+    "lat": 46.781581146528076,
+    "lon": 4.842664475538595
+  },
+  "FRXCE": {
+    "name": "CERBERE",
+    "lat": 42.44251215251786,
+    "lon": 3.165212405531213
+  },
+  "FRXCR": {
+    "name": "CHALONS EN CHAMPAGNE",
+    "lat": 48.955247745740344,
+    "lon": 4.349003538143236
+  },
+  "FRXCU": {
+    "name": "COLLIOURE",
+    "lat": 42.52676701474552,
+    "lon": 3.078202792729514
+  },
+  "FRXCX": {
+    "name": "CHATELLERAULT",
+    "lat": 46.81853401633763,
+    "lon": 0.549511361252686
+  },
+  "FRXCZ": {
+    "name": "CHARLEVILLE MEZIERES",
+    "lat": 49.76839129314256,
+    "lon": 4.725645350076278
+  },
+  "FRXDN": {
+    "name": "DOUAI",
+    "lat": 50.3723951886295,
+    "lon": 3.090695871062331
+  },
+  "FRXEB": {
+    "name": "EVIAN LES BAINS",
+    "lat": 46.39775287167254,
+    "lon": 6.578426619097867
+  },
+  "FRXFX": {
+    "name": "FOIX",
+    "lat": 42.9696489972974,
+    "lon": 1.606884169788092
+  },
+  "FRXGF": {
+    "name": "ST GERVAIS LES BAINS LE FAYET",
+    "lat": 45.90673429155511,
+    "lon": 6.701760335771892
+  },
+  "FRXHE": {
+    "name": "HYERES",
+    "lat": 43.10866063770032,
+    "lon": 6.124240371340878
+  },
+  "FRXJZ": {
+    "name": "ST JEAN DE LUZ CIBOURE",
+    "lat": 43.38591458472245,
+    "lon": -1.660269848901532
+  },
+  "FRXLD": {
+    "name": "LANDERNEAU",
+    "lat": 48.454375786546734,
+    "lon": -4.25470848729941
+  },
+  "FRXLE": {
+    "name": "LENS",
+    "lat": 50.4269374843082,
+    "lon": 2.827311340755957
+  },
+  "FRXLR": {
+    "name": "LIBOURNE",
+    "lat": 44.91609738986717,
+    "lon": -0.235868421912055
+  },
+  "FRXLT": {
+    "name": "AX LES THERMES",
+    "lat": 42.724771434731764,
+    "lon": 1.83346662646096
+  },
+  "FRXMK": {
+    "name": "MONTELIMAR GARE SNCF",
+    "lat": 44.557840395905664,
+    "lon": 4.744204505291624
+  },
+  "FRXMR": {
+    "name": "MARMANDE",
+    "lat": 44.50320309644851,
+    "lon": 0.168080473794613
+  },
+  "FRXMU": {
+    "name": "MOULINS SUR ALLIER",
+    "lat": 46.563190192429886,
+    "lon": 3.339881370157939
+  },
+  "FRXMW": {
+    "name": "MONTAUBAN VILLE BOURBON",
+    "lat": 44.015316953088536,
+    "lon": 1.340037744038176
+  },
+  "FRXNA": {
+    "name": "NARBONNE",
+    "lat": 43.19095737823951,
+    "lon": 3.006223725835589
+  },
+  "FRXOG": {
+    "name": "ORANGE",
+    "lat": 44.13722281973453,
+    "lon": 4.820388361615443
+  },
+  "FRXPV": {
+    "name": "PORT VENDRES VILLE",
+    "lat": 42.51337430079546,
+    "lon": 3.102682609531887
+  },
+  "FRXRN": {
+    "name": "REDON",
+    "lat": 47.65178482152481,
+    "lon": -2.088521843210875
+  },
+  "FRXRO": {
+    "name": "LA ROCHE SUR YON",
+    "lat": 46.67231451615675,
+    "lon": -1.436071697208432
+  },
+  "FRXRS": {
+    "name": "LES ARCS DRAGUIGNAN",
+    "lat": 43.4557307073462,
+    "lon": 6.482974400838856
+  },
+  "FRXSB": {
+    "name": "ST MALO",
+    "lat": 48.64646832563749,
+    "lon": -2.003739259895041
+  },
+  "FRXSH": {
+    "name": "ST PIERRE DES CORPS",
+    "lat": 47.38585778688402,
+    "lon": 0.725129290990031
+  },
+  "FRXSJ": {
+    "name": "SAINT QUENTIN",
+    "lat": 49.83950111914297,
+    "lon": 3.296471560703155
+  },
+  "FRXSK": {
+    "name": "ST RAPHAEL VALESCURE",
+    "lat": 43.42338928710671,
+    "lon": 6.769506898216055
+  },
+  "FRXSN": {
+    "name": "SALLANCHES COMBLOUX MEGEVE",
+    "lat": 45.935777917366835,
+    "lon": 6.636499485661511
+  },
+  "FRXSQ": {
+    "name": "SELESTAT",
+    "lat": 48.260548639068844,
+    "lon": 7.442342622007153
+  },
+  "FRXST": {
+    "name": "SAINTES",
+    "lat": 45.74879238922889,
+    "lon": -0.617376266478173
+  },
+  "FRXSW": {
+    "name": "SEDAN",
+    "lat": 49.69492919596202,
+    "lon": 4.930133781244277
+  },
+  "FRXSY": {
+    "name": "SETE",
+    "lat": 43.41279860027326,
+    "lon": 3.696608504888423
+  },
+  "FRXTB": {
+    "name": "TARBES",
+    "lat": 43.240313930703124,
+    "lon": 0.068298520911083
+  },
+  "FRXTD": {
+    "name": "ST DIE",
+    "lat": 48.284,
+    "lon": 6.95
+  },
+  "FRXTE": {
+    "name": "LATOUR DE CAROL ENVEITG",
+    "lat": 42.458529754636274,
+    "lon": 1.905147110087664
+  },
+  "FRXTH": {
+    "name": "THIONVILLE",
+    "lat": 49.3537250846467,
+    "lon": 6.169815046066892
+  },
+  "FRXTS": {
+    "name": "THONON LES BAINS",
+    "lat": 46.369193044334956,
+    "lon": 6.482718549845309
+  },
+  "FRXUY": {
+    "name": "AURAY",
+    "lat": 47.68033272161658,
+    "lon": -3.00040097342075
+  },
+  "FRXVN": {
+    "name": "VERDUN",
+    "lat": 49.16551301257006,
+    "lon": 5.378755568857466
+  },
+  "FRXVR": {
+    "name": "ST MICHEL VALLOIRE",
+    "lat": 45.21754482809475,
+    "lon": 6.47007064352014
+  },
+  "FRXVS": {
+    "name": "VALENCIENNES",
+    "lat": 50.36413160317695,
+    "lon": 3.5171596698237284
+  },
+  "FRXVT": {
+    "name": "VITRE",
+    "lat": 48.12256415718424,
+    "lon": -1.210888541094374
+  },
+  "FRXVZ": {
+    "name": "VIERZON",
+    "lat": 47.22730863535949,
+    "lon": 2.057635106071219
+  },
+  "FRXYT": {
+    "name": "TOULOUSE MATABIAU",
+    "lat": 43.614683389635545,
+    "lon": 1.453299711818548
+  },
+  "FRXZP": {
+    "name": "NIMES PONT DU GARD",
+    "lat": 43.81621398463382,
+    "lon": 4.5068131665369116
+  },
+  "FRZAO": {
+    "name": "CAHORS",
+    "lat": 44.447901776063766,
+    "lon": 1.43301656128334
+  },
+  "ITMPG": {
+    "name": "MILANO PORTA GARIBALDI",
+    "lat": 45.485,
+    "lon": 9.187
+  },
+  "ITOCS": {
+    "name": "OUX CESANA CLAV SESTRIERE",
+    "lat": 44.949,
+    "lon": 6.806
+  },
+  "ITTRS": {
+    "name": "TORINO PORTA SUSA",
+    "lat": 45.073,
+    "lon": 7.666
+  },
+  "LULUX": {
+    "name": "LUXEMBOURG",
+    "lat": 49.6,
+    "lon": 6.134
+  }
+}
