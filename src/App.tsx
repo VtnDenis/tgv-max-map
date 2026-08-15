@@ -1352,6 +1352,7 @@ export default function App() {
             value={origin}
             onChange={setOrigin}
             placeholder="Rechercher une gare…"
+            parisQuickAdd
             onGeolocate={() => handleGeolocate('origin')}
             geolocating={geoTarget === 'origin' && geo.state.loading}
           />
@@ -1375,6 +1376,7 @@ export default function App() {
             value={destination}
             onChange={setDestination}
             placeholder="Rechercher une gare…"
+            parisQuickAdd
           />
         )}
 
@@ -1385,6 +1387,7 @@ export default function App() {
             value={rayonOrigin}
             onChange={(value) => setRayonOrigin(value.slice(-1))}
             placeholder="Rechercher une gare…"
+            single
             onGeolocate={() => handleGeolocate('rayon')}
             geolocating={geoTarget === 'rayon' && geo.state.loading}
           />
@@ -1408,6 +1411,7 @@ export default function App() {
             value={origin}
             onChange={(value) => setOrigin(value.slice(-1))}
             placeholder="Rechercher une gare…"
+            single
             onGeolocate={() => handleGeolocate('origin')}
             geolocating={geoTarget === 'origin' && geo.state.loading}
           />
@@ -1433,6 +1437,7 @@ export default function App() {
             value={heatmapOrigin}
             onChange={setHeatmapOrigin}
             placeholder="Tout le réseau…"
+            parisQuickAdd
           />
         )}
 
@@ -1487,6 +1492,7 @@ export default function App() {
               value={from}
               onChange={setFrom}
               placeholder="Rechercher une gare…"
+              parisQuickAdd
               onGeolocate={() => handleGeolocate('from')}
               geolocating={geoTarget === 'from' && geo.state.loading}
             />
@@ -1496,6 +1502,7 @@ export default function App() {
               value={to}
               onChange={setTo}
               placeholder="Rechercher une gare…"
+              parisQuickAdd
             />
             <details className="field">
               <summary>Options avancées</summary>

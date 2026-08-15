@@ -651,6 +651,23 @@ button.roulette:disabled {
   flex: 1;
 }
 
+.paris-quick {
+  align-self: flex-start;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.paris-quick:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
 .add-btn {
   width: 42px;
   min-height: 42px;

@@ -1,6 +1,6 @@
 import { useId, useRef, useState, type KeyboardEvent } from 'react';
 import type { Station } from '../types';
-import { haversineKm } from '../lib/geo';
+import { getParisAreaStations, haversineKm } from '../lib/geo';
 
 export interface StationMultiSelectProps {
   label: string;
@@ -10,6 +10,8 @@ export interface StationMultiSelectProps {
   placeholder?: string;
   onGeolocate?: () => void;
   geolocating?: boolean;
+  single?: boolean;
+  parisQuickAdd?: boolean;
 }
 
 interface Match {
@@ -81,6 +83,8 @@ export default function StationMultiSelect({
   placeholder,
   onGeolocate,
   geolocating = false,
+  single = false,
+  parisQuickAdd = false,
 }: StationMultiSelectProps): JSX.Element {
   const id = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -107,6 +111,13 @@ export default function StationMultiSelect({
 
   function remove(code: string): void {
     onChange(value.filter((s) => s.code !== code));
+  }
+
+  function addParisArea(): void {
+    const existing = new Set(value.map((s) => s.code));
+    const toAdd = getParisAreaStations().filter((s) => !existing.has(s.code));
+    if (toAdd.length > 0) onChange([...value, ...toAdd]);
+    inputRef.current?.focus();
   }
 
   function handleChange(next: string): void {
@@ -172,16 +183,18 @@ export default function StationMultiSelect({
               {geolocating ? '…' : '📍'}
             </button>
           )}
-          <button
-            type="button"
-            className="add-btn"
-            aria-label={`Ajouter ${label}`}
-            disabled={matches.length === 0}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={addHighlighted}
-          >
-            +
-          </button>
+          {!single && (
+            <button
+              type="button"
+              className="add-btn"
+              aria-label={`Ajouter ${label}`}
+              disabled={matches.length === 0}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={addHighlighted}
+            >
+              +
+            </button>
+          )}
         </div>
         {open && matches.length > 0 && (
           <ul className="menu">
@@ -218,6 +231,16 @@ export default function StationMultiSelect({
             </span>
           ))}
         </div>
+      )}
+      {parisQuickAdd && (
+        <button
+          type="button"
+          className="paris-quick"
+          title="Ajouter Paris et toutes les gares à moins de 30 km"
+          onClick={addParisArea}
+        >
+          Paris et alentours
+        </button>
       )}
     </div>
   );

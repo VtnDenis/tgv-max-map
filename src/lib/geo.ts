@@ -90,6 +90,16 @@ export function nearestStation(lat: number, lon: number): Station | undefined {
   return best;
 }
 
+const PARIS_CENTER = { lat: 48.853, lon: 2.348 };
+const PARIS_RADIUS_KM = 30;
+
+/** All stations within ~30 km of central Paris (Paris + nearby TGV hubs). */
+export function getParisAreaStations(radiusKm = PARIS_RADIUS_KM): Station[] {
+  return STATIONS.filter(
+    (s) => haversineKm(PARIS_CENTER.lat, PARIS_CENTER.lon, s.lat, s.lon) <= radiusKm,
+  );
+}
+
 /** Return stations matching `query` on name or code, ranked by relevance. */
 export function searchStations(query: string, limit = 20): Station[] {
   const needle = normalize(query.trim());
