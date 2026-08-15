@@ -65,6 +65,52 @@ function formatDate(iso: string): string {
   return `${d}/${m}/${y}`;
 }
 
+function formatTime(min: number): string {
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+const WEEKDAYS = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+
+function formatDayLabel(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d));
+  return `${WEEKDAYS[date.getUTCDay()]} ${d}`;
+}
+
+function computeDayItineraries(
+  edges: Edge[],
+  fromCodes: string[],
+  toCodes: string[],
+  allowedDates: string[] | null,
+  options: {
+    maxLegs: number;
+    minConnection: number;
+    maxConnection?: number;
+  },
+): Itinerary[] {
+  const byDate = new Map<string, Edge[]>();
+  for (const edge of edges) {
+    const d = edge.date ?? '';
+    const list = byDate.get(d);
+    if (list) list.push(edge);
+    else byDate.set(d, [edge]);
+  }
+
+  const found: Itinerary[] = [];
+  for (const [d, dayEdges] of byDate) {
+    if (allowedDates && !allowedDates.includes(d)) continue;
+    const floor = isToday(d) ? nowMinutes() : -1;
+    const usable = floor < 0 ? dayEdges : dayEdges.filter((e) => e.dep >= floor);
+    const dayResults = findItineraries(usable, fromCodes, toCodes, options);
+    for (const it of dayResults) {
+      found.push({ ...it, date: d });
+    }
+  }
+  return found;
+}
+
 function buildPopup(list: Leg[]): string {
   return list
     .map((leg) => {
@@ -115,9 +161,13 @@ export default function App() {
     arrival: { min: 0, max: 24 * 60 - 1 },
     kind: 'departure',
   });
-  const [selectedItinerary, setSelectedItinerary] = useState<number | null>(null);
+  const [selectedOutbound, setSelectedOutbound] = useState<Itinerary | null>(null);
+  const [selectedReturn, setSelectedReturn] = useState<Itinerary | null>(null);
   const [connectionTab, setConnectionTab] = useState<number | 'all'>('all');
   const [dayTab, setDayTab] = useState<string | 'all'>('all');
+  const [legDayTab, setLegDayTab] = useState<string | 'all'>('all');
+  const [tripKind, setTripKind] = useState<'single' | 'return'>('single');
+  const [directionTab, setDirectionTab] = useState<'outbound' | 'return'>('outbound');
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({
     key: 'arrival',
     dir: 'asc',
@@ -227,6 +277,9 @@ export default function App() {
         edgesCache.current.set(key, cached);
       }
       setEdges(cached);
+      setDirectionTab('outbound');
+      setSelectedOutbound(null);
+      setSelectedReturn(null);
     } catch (err: unknown) {
       setError(toErrorMessage(err));
     } finally {
@@ -237,31 +290,19 @@ export default function App() {
   const itineraries = useMemo<Itinerary[] | null>(() => {
     if (!edges || from.length === 0 || to.length === 0) return null;
 
-    const byDate = new Map<string, Edge[]>();
-    for (const edge of edges) {
-      const d = edge.date ?? '';
-      const list = byDate.get(d);
-      if (list) list.push(edge);
-      else byDate.set(d, [edge]);
-    }
-
-    const found: Itinerary[] = [];
-    const fromCodes = from.map((s) => s.code);
-    const toCodes = to.map((s) => s.code);
     const options = {
       maxLegs: constraints.maxConnections + 1,
       minConnection: constraints.minConnection,
       maxConnection: constraints.maxConnection,
     };
 
-    for (const [d, dayEdges] of byDate) {
-      const floor = isToday(d) ? nowMinutes() : -1;
-      const usable = floor < 0 ? dayEdges : dayEdges.filter((e) => e.dep >= floor);
-      const dayResults = findItineraries(usable, fromCodes, toCodes, options);
-      for (const it of dayResults) {
-        found.push({ ...it, date: d });
-      }
-    }
+    const found = computeDayItineraries(
+      edges,
+      from.map((s) => s.code),
+      to.map((s) => s.code),
+      tripKind === 'return' ? [dateFrom] : null,
+      options,
+    );
 
     const filtered = found.filter((it) => {
       return (
@@ -277,31 +318,77 @@ export default function App() {
         (a.date ?? '').localeCompare(b.date ?? '') || a.arrivalTime - b.arrivalTime,
     );
     return filtered.slice(0, MAX_ITINERARIES);
-  }, [edges, from, to, constraints, timeFilter]);
+  }, [edges, from, to, constraints, timeFilter, tripKind, dateFrom]);
+
+  const returnItineraries = useMemo<Itinerary[] | null>(() => {
+    if (!edges || tripKind !== 'return' || from.length === 0 || to.length === 0) {
+      return null;
+    }
+
+    const options = {
+      maxLegs: constraints.maxConnections + 1,
+      minConnection: constraints.minConnection,
+      maxConnection: constraints.maxConnection,
+    };
+
+    const found = computeDayItineraries(
+      edges,
+      to.map((s) => s.code),
+      from.map((s) => s.code),
+      [dateTo],
+      options,
+    );
+
+    let filtered = found.filter((it) => {
+      return (
+        it.departureTime >= timeFilter.departure.min &&
+        it.departureTime <= timeFilter.departure.max &&
+        it.arrivalTime >= timeFilter.arrival.min &&
+        it.arrivalTime <= timeFilter.arrival.max
+      );
+    });
+
+    if (selectedOutbound) {
+      const obDate = selectedOutbound.date ?? '';
+      const obArr = selectedOutbound.arrivalTime;
+      filtered = filtered.filter((it) => {
+        const d = it.date ?? '';
+        return d > obDate || (d === obDate && it.departureTime >= obArr);
+      });
+    }
+
+    filtered.sort((a, b) => a.arrivalTime - b.arrivalTime);
+    return filtered.slice(0, MAX_ITINERARIES);
+  }, [edges, from, to, constraints, timeFilter, tripKind, dateTo, selectedOutbound]);
+
+  const activeItineraries = useMemo<Itinerary[] | null>(
+    () => (directionTab === 'return' ? returnItineraries : itineraries),
+    [directionTab, returnItineraries, itineraries],
+  );
 
   const connectionCounts = useMemo<Array<[number, number]>>(() => {
-    if (!itineraries) return [];
+    if (!activeItineraries) return [];
     const counts = new Map<number, number>();
-    for (const it of itineraries) {
+    for (const it of activeItineraries) {
       const c = it.legs.length - 1;
       counts.set(c, (counts.get(c) ?? 0) + 1);
     }
     return [...counts.entries()].sort((a, b) => a[0] - b[0]);
-  }, [itineraries]);
+  }, [activeItineraries]);
 
   const dayCounts = useMemo<Array<[string, number]>>(() => {
-    if (!itineraries) return [];
+    if (!activeItineraries) return [];
     const counts = new Map<string, number>();
-    for (const it of itineraries) {
+    for (const it of activeItineraries) {
       const d = it.date ?? '';
       counts.set(d, (counts.get(d) ?? 0) + 1);
     }
     return [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  }, [itineraries]);
+  }, [activeItineraries]);
 
   const visibleItineraries = useMemo<Itinerary[] | null>(() => {
-    if (!itineraries) return null;
-    let filtered = itineraries;
+    if (!activeItineraries) return null;
+    let filtered = activeItineraries;
     if (connectionTab !== 'all') {
       filtered = filtered.filter((it) => it.legs.length - 1 === connectionTab);
     }
@@ -326,26 +413,48 @@ export default function App() {
           return 0;
       }
     });
-  }, [itineraries, connectionTab, dayTab, sort]);
+  }, [activeItineraries, connectionTab, dayTab, sort]);
 
   const visibleLegs = useMemo<Leg[] | null>(() => {
     if (!legs) return null;
     const range =
       timeFilter.kind === 'departure' ? timeFilter.departure : timeFilter.arrival;
     return legs.filter((leg) => {
+      if (legDayTab !== 'all' && (leg.date ?? '') !== legDayTab) return false;
       const dep = toMinutes(leg.heure_depart);
       if (leg.date && isToday(leg.date) && dep < nowMinutes()) return false;
       const t =
         timeFilter.kind === 'departure' ? dep : toMinutes(leg.heure_arrivee);
       return t >= range.min && t <= range.max;
     });
-  }, [legs, timeFilter]);
+  }, [legs, timeFilter, legDayTab]);
 
   useEffect(() => {
-    setSelectedItinerary(null);
     setConnectionTab('all');
     setDayTab('all');
+  }, [itineraries, returnItineraries]);
+
+  useEffect(() => {
+    setSelectedOutbound(null);
   }, [itineraries]);
+
+  useEffect(() => {
+    setSelectedReturn(null);
+  }, [returnItineraries]);
+
+  useEffect(() => {
+    setLegDayTab('all');
+  }, [legs]);
+
+  const legDayCounts = useMemo<Array<[string, number]>>(() => {
+    if (!legs) return [];
+    const counts = new Map<string, number>();
+    for (const leg of legs) {
+      const d = leg.date ?? '';
+      if (d) counts.set(d, (counts.get(d) ?? 0) + 1);
+    }
+    return [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  }, [legs]);
 
   const handleModeChange = useCallback((next: Mode) => {
     setMode(next);
@@ -353,6 +462,17 @@ export default function App() {
     setEdges(null);
     setFocus(null);
     setError(null);
+    setTripKind('single');
+    setDirectionTab('outbound');
+    setSelectedOutbound(null);
+    setSelectedReturn(null);
+  }, []);
+
+  const handleTripKindChange = useCallback((next: 'single' | 'return') => {
+    setTripKind(next);
+    setDirectionTab('outbound');
+    setSelectedOutbound(null);
+    setSelectedReturn(null);
   }, []);
 
   const handleSelect = useCallback((code: string) => {
@@ -543,9 +663,11 @@ export default function App() {
     }
 
     if (mode === 'itinerary' && visibleItineraries) {
+      const selected =
+        directionTab === 'return' ? selectedReturn : selectedOutbound;
       const list =
-        selectedItinerary !== null && visibleItineraries[selectedItinerary]
-          ? [visibleItineraries[selectedItinerary]]
+        selected && visibleItineraries.includes(selected)
+          ? [selected]
           : visibleItineraries.slice(0, 5);
       const lines: MapLine[] = [];
       for (const itinerary of list) {
@@ -567,7 +689,7 @@ export default function App() {
     }
 
     return [];
-  }, [mode, origin, destination, visibleLegs, visibleItineraries, selectedItinerary]);
+  }, [mode, origin, destination, visibleLegs, visibleItineraries, selectedOutbound, selectedReturn, directionTab]);
 
   return (
     <div className="app">
@@ -582,12 +704,31 @@ export default function App() {
 
         <ModeTabs mode={mode} onChange={handleModeChange} />
 
+        {mode === 'itinerary' && (
+          <div className="field">
+            <label>Type de recherche</label>
+            <select
+              value={tripKind}
+              onChange={(e) =>
+                handleTripKindChange(e.target.value as 'single' | 'return')
+              }
+            >
+              <option value="single">Aller simple</option>
+              <option value="return">Aller-retour</option>
+            </select>
+          </div>
+        )}
+
         {range ? (
           <DateRangePicker
             from={dateFrom}
             to={dateTo}
             min={range.min}
             max={range.max}
+            mode={tripKind === 'return' ? 'split' : 'range'}
+            label="Dates"
+            fromLabel="Aller"
+            toLabel="Retour"
             onChange={({ from: f, to: t }) => {
               setDateFrom(f);
               setDateTo(t);
@@ -652,7 +793,9 @@ export default function App() {
                 void searchItinerary();
               }}
             >
-              Rechercher un itinéraire
+              {tripKind === 'return'
+                ? 'Rechercher l’aller-retour'
+                : 'Rechercher un itinéraire'}
             </button>
           </>
         )}
@@ -671,6 +814,27 @@ export default function App() {
 
         {mode === 'origin' && visibleLegs != null && origin.length > 0 && (
           <>
+            {legDayCounts.length > 1 && (
+              <div className="tabs day-tabs">
+                <button
+                  type="button"
+                  className={legDayTab === 'all' ? 'active' : undefined}
+                  onClick={() => setLegDayTab('all')}
+                >
+                  Tous
+                </button>
+                {legDayCounts.map(([d, n]) => (
+                  <button
+                    type="button"
+                    key={d}
+                    className={legDayTab === d ? 'active' : undefined}
+                    onClick={() => setLegDayTab(d)}
+                  >
+                    {formatDayLabel(d)} ({n})
+                  </button>
+                ))}
+              </div>
+            )}
             <LegList
               legs={visibleLegs}
               fixedName={origin.map((s) => s.name).join(', ')}
@@ -680,24 +844,65 @@ export default function App() {
           </>
         )}
         {mode === 'destination' && visibleLegs != null && destination.length > 0 && (
-          <LegList
-            legs={visibleLegs}
-            fixedName={destination.map((s) => s.name).join(', ')}
-            mode="destination"
-            onSelect={handleSelect}
-          />
-        )}
-        {mode === 'itinerary' && itineraries != null && (
           <>
-            {itineraries.length > 0 && (
+            {legDayCounts.length > 1 && (
+              <div className="tabs day-tabs">
+                <button
+                  type="button"
+                  className={legDayTab === 'all' ? 'active' : undefined}
+                  onClick={() => setLegDayTab('all')}
+                >
+                  Tous
+                </button>
+                {legDayCounts.map(([d, n]) => (
+                  <button
+                    type="button"
+                    key={d}
+                    className={legDayTab === d ? 'active' : undefined}
+                    onClick={() => setLegDayTab(d)}
+                  >
+                    {formatDayLabel(d)} ({n})
+                  </button>
+                ))}
+              </div>
+            )}
+            <LegList
+              legs={visibleLegs}
+              fixedName={destination.map((s) => s.name).join(', ')}
+              mode="destination"
+              onSelect={handleSelect}
+            />
+          </>
+        )}
+        {mode === 'itinerary' && activeItineraries != null && (
+          <>
+            {activeItineraries.length > 0 && (
               <>
+                {tripKind === 'return' && (
+                  <div className="tabs">
+                    <button
+                      type="button"
+                      className={directionTab === 'outbound' ? 'active' : undefined}
+                      onClick={() => setDirectionTab('outbound')}
+                    >
+                      Aller ({itineraries?.length ?? 0})
+                    </button>
+                    <button
+                      type="button"
+                      className={directionTab === 'return' ? 'active' : undefined}
+                      onClick={() => setDirectionTab('return')}
+                    >
+                      Retour ({returnItineraries?.length ?? 0})
+                    </button>
+                  </div>
+                )}
                 <div className="tabs">
                   <button
                     type="button"
                     className={connectionTab === 'all' ? 'active' : undefined}
                     onClick={() => setConnectionTab('all')}
                   >
-                    Tous ({itineraries.length})
+                    Tous ({activeItineraries.length})
                   </button>
                   {connectionCounts.map(([count, n]) => (
                     <button
@@ -749,10 +954,24 @@ export default function App() {
                 </div>
               </>
             )}
+            {directionTab === 'return' && selectedOutbound && (
+              <div className="hint">
+                Retours après {formatDate(selectedOutbound.date ?? '')}{' '}
+                {formatTime(selectedOutbound.arrivalTime)}
+              </div>
+            )}
             <ItineraryList
               itineraries={visibleItineraries ?? []}
-              onSelect={setSelectedItinerary}
-              selected={selectedItinerary}
+              selected={
+                directionTab === 'return' ? selectedReturn : selectedOutbound
+              }
+              onSelect={(it) => {
+                if (directionTab === 'return') {
+                  setSelectedReturn((cur) => (cur === it ? null : it));
+                } else {
+                  setSelectedOutbound((cur) => (cur === it ? null : it));
+                }
+              }}
             />
           </>
         )}

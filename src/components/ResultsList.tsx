@@ -89,8 +89,8 @@ export function LegList(props: {
 
 export function ItineraryList(props: {
   itineraries: Itinerary[];
-  onSelect?: (index: number) => void;
-  selected?: number | null;
+  onSelect?: (itinerary: Itinerary) => void;
+  selected?: Itinerary | null;
 }): JSX.Element {
   const { itineraries, onSelect, selected = null } = props;
 
@@ -107,16 +107,16 @@ export function ItineraryList(props: {
             ? 'direct'
             : `${connections} correspondance${connections > 1 ? 's' : ''}`;
         const duration = itinerary.arrivalTime - itinerary.departureTime;
-        const isSelected = selected === i;
+        const isSelected = selected === itinerary;
         return (
           <div
             className={`result-card clickable${isSelected ? ' selected' : ''}`}
             key={i}
             role="button"
             tabIndex={0}
-            onClick={() => onSelect?.(i)}
+            onClick={() => onSelect?.(itinerary)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') onSelect?.(i);
+              if (e.key === 'Enter') onSelect?.(itinerary);
             }}
           >
             <div className="row">
